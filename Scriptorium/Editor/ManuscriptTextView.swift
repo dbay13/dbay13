@@ -11,8 +11,11 @@ struct ManuscriptStyle: Equatable {
     var dimInk: UIColor
     var mutedInk: UIColor
     var rubric: UIColor
+    var rubricDeep: UIColor
+    var rubricTop: UIColor
+    var rubricBottom: UIColor
     var gold: UIColor
-    var surface: UIColor
+    var rule: UIColor
     var illuminated: Bool
     var focusMode: Bool
     var dark: Bool
@@ -20,17 +23,20 @@ struct ManuscriptStyle: Equatable {
     static func make(scribe: ScribeStyle, dark: Bool, focusMode: Bool = false, illuminated: Bool? = nil) -> ManuscriptStyle {
         let traits = UITraitCollection(userInterfaceStyle: dark ? .dark : .light)
         func resolve(_ color: UIColor) -> UIColor { color.resolvedColor(with: traits) }
-        let bodySize: CGFloat = focusMode ? 20 : 19
+        let bodySize: CGFloat = focusMode ? 20.5 : 19.5
         return ManuscriptStyle(
             bodyFont: UIFontMetrics(forTextStyle: .body).scaledFont(for: scribe.uiBody(bodySize)),
-            titleFont: UIFontMetrics(forTextStyle: .title1).scaledFont(for: scribe.uiBody(30, .semibold)),
+            titleFont: UIFontMetrics(forTextStyle: .title1).scaledFont(for: scribe.uiBody(32, .semibold)),
             initialFont: Typeface.uiInitial(48),
-            ink: resolve(Palette.inkUI),
-            dimInk: resolve(Palette.dimUI),
+            ink: focusMode ? Palette.vigilInk : resolve(Palette.inkUI),
+            dimInk: focusMode ? Palette.vigilDim : resolve(Palette.dimUI),
             mutedInk: resolve(Palette.mutedUI),
             rubric: resolve(scribe.ink.uiColor),
+            rubricDeep: scribe.ink.deepUIColor,
+            rubricTop: scribe.ink.deepTop,
+            rubricBottom: scribe.ink.deepBottom,
             gold: resolve(Palette.goldUI),
-            surface: resolve(Palette.surfaceUI),
+            rule: resolve(Palette.ruleStrongUI),
             illuminated: illuminated ?? scribe.illuminated,
             focusMode: focusMode,
             dark: dark
@@ -122,21 +128,33 @@ struct ManuscriptTextView: UIViewRepresentable {
     }
 }
 
-/// A TextKit 1 text view that sets the first line as a centered title,
-/// paints an illuminated initial at the start of the first paragraph,
-/// draws a fleuron under the title, and makes ☐ / ☑ tappable.
+/// A TextKit 1 text view that sets the first line as a centered title and
+/// decorates the page: a fleuron rule under the title, a gilded initial at the
+/// start of the first paragraph, drawn checkboxes for ☐ / ☑ lines, and fleuron
+/// rules for ❦ lines. The real characters stay in the text, hidden, so the
+/// note remains plain text.
 final class ManuscriptUITextView: UITextView {
+    private struct CheckEntry {
+        let index: Int
+        let checked: Bool
+        let dimmed: Bool
+    }
+
     private let storage = NSTextStorage()
     private let initialView = IlluminatedCapView()
-    private let flourishView = FlourishRuleView()
+    private let titleRule = FlourishRuleView()
+    private var checkViews: [CheckboxMarkView] = []
+    private var ruleViews: [FlourishRuleView] = []
     private let gestureGate = GestureGate()
 
     private var initialIndex: Int?
-    private var initialLetter = ""
+    private var checkEntries: [CheckEntry] = []
+    private var fleuronIndices: [Int] = []
     private var exclusionRect = CGRect.null
     private var bodyLineSpacing: CGFloat = 6
+    private var checkSide: CGFloat = 23
 
-    private static let titleGap: CGFloat = 46
+    private static let titleGap: CGFloat = 50
 
     var manuscriptStyle: ManuscriptStyle? {
         didSet {
@@ -157,11 +175,11 @@ final class ManuscriptUITextView: UITextView {
         keyboardDismissMode = .interactive
         autocapitalizationType = .sentences
         smartQuotesType = .yes
-        textContainerInset = UIEdgeInsets(top: 10, left: 24, bottom: 140, right: 24)
+        textContainerInset = UIEdgeInsets(top: 8, left: 28, bottom: 40, right: 28)
 
         initialView.isHidden = true
-        flourishView.isHidden = true
-        addSubview(flourishView)
+        titleRule.isHidden = true
+        addSubview(titleRule)
         addSubview(initialView)
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
@@ -213,10 +231,11 @@ final class ManuscriptUITextView: UITextView {
         let caret = min(selectedRange.location, string.length)
         let activeParagraph = string.paragraphRange(for: NSRange(location: caret, length: 0))
 
-        bodyLineSpacing = round(style.bodyFont.pointSize * 0.32)
+        bodyLineSpacing = round(style.bodyFont.pointSize * 0.36)
         let bodyParagraph = NSMutableParagraphStyle()
         bodyParagraph.lineSpacing = bodyLineSpacing
-        bodyParagraph.paragraphSpacing = round(style.bodyFont.pointSize * 0.5)
+        bodyParagraph.paragraphSpacing = round(style.bodyFont.pointSize * 0.56)
+        bodyParagraph.hyphenationFactor = 0.6
 
         let titleParagraph = NSMutableParagraphStyle()
         titleParagraph.alignment = .center
@@ -225,14 +244,17 @@ final class ManuscriptUITextView: UITextView {
 
         let fleuronParagraph = NSMutableParagraphStyle()
         fleuronParagraph.alignment = .center
-        fleuronParagraph.paragraphSpacing = bodyParagraph.paragraphSpacing
+        fleuronParagraph.paragraphSpacingBefore = 6
+        fleuronParagraph.paragraphSpacing = round(style.bodyFont.pointSize * 0.8)
 
-        let boxFont = UIFont.systemFont(ofSize: round(style.bodyFont.pointSize * 1.05))
-        let boxWidth = ("\(Glyph.box) " as NSString).size(withAttributes: [.font: boxFont]).width
+        checkSide = round(style.bodyFont.pointSize * 1.2)
+        let glyphAdvance = (Glyph.box as NSString).size(withAttributes: [.font: style.bodyFont]).width
+        let spaceAdvance = (" " as NSString).size(withAttributes: [.font: style.bodyFont]).width
+        let boxKern = max(0, checkSide + 9 - glyphAdvance)
         let checklistParagraph = NSMutableParagraphStyle()
         checklistParagraph.lineSpacing = bodyLineSpacing
-        checklistParagraph.paragraphSpacing = round(style.bodyFont.pointSize * 0.25)
-        checklistParagraph.headIndent = ceil(boxWidth)
+        checklistParagraph.paragraphSpacing = round(style.bodyFont.pointSize * 0.3)
+        checklistParagraph.headIndent = ceil(checkSide + 9 + spaceAdvance)
 
         let bodyAttributes: [NSAttributedString.Key: Any] = [
             .font: style.bodyFont,
@@ -247,6 +269,8 @@ final class ManuscriptUITextView: UITextView {
 
         var newInitialIndex: Int?
         var newInitialLetter = ""
+        var newChecks: [CheckEntry] = []
+        var newFleurons: [Int] = []
         var paragraphNumber = 0
 
         storage.beginEditing()
@@ -267,21 +291,24 @@ final class ManuscriptUITextView: UITextView {
             let paragraph = string.substring(with: range)
 
             if ScrollText.isChecklist(paragraph) {
+                let checked = paragraph.hasPrefix(Glyph.checked)
                 self.storage.addAttribute(.paragraphStyle, value: checklistParagraph, range: enclosing)
                 self.storage.addAttributes(
-                    [.font: boxFont, .foregroundColor: dimmed ? style.dimInk : style.rubric],
+                    [.foregroundColor: UIColor.clear, .kern: boxKern],
                     range: NSRange(location: range.location, length: 1)
                 )
-                if paragraph.hasPrefix(Glyph.checked), range.length > 2 {
+                if checked, range.length > 2 {
                     let words = NSRange(location: range.location + 2, length: range.length - 2)
                     self.storage.addAttributes([
                         .foregroundColor: dimmed ? style.dimInk : style.mutedInk,
                         .strikethroughStyle: NSUnderlineStyle.single.rawValue,
-                        .strikethroughColor: style.mutedInk,
+                        .strikethroughColor: style.rubric.withAlphaComponent(0.6),
                     ], range: words)
                 }
+                newChecks.append(CheckEntry(index: range.location, checked: checked, dimmed: dimmed))
             } else if paragraph.trimmingCharacters(in: .whitespaces) == Glyph.fleuron {
-                self.storage.addAttributes([.paragraphStyle: fleuronParagraph, .foregroundColor: style.gold], range: enclosing)
+                self.storage.addAttributes([.paragraphStyle: fleuronParagraph, .foregroundColor: UIColor.clear], range: enclosing)
+                newFleurons.append(range.location)
             } else if paragraphNumber == 1, style.illuminated, range.length > 1,
                       let first = paragraph.first, first.isLetter {
                 // Hide the real letter; the illuminated initial is drawn in its place.
@@ -297,9 +324,10 @@ final class ManuscriptUITextView: UITextView {
         storage.endEditing()
 
         initialIndex = newInitialIndex
-        initialLetter = newInitialLetter
-        initialView.configure(letter: newInitialLetter, font: style.initialFont, ink: style.rubric, gold: style.gold, surface: style.surface)
-        flourishView.configure(fleuron: style.gold, rule: style.mutedInk.withAlphaComponent(0.4))
+        checkEntries = newChecks
+        fleuronIndices = newFleurons
+        initialView.configure(letter: newInitialLetter, font: style.initialFont, top: style.rubricTop, deep: style.rubricDeep, bottom: style.rubricBottom)
+        titleRule.configure(fleuron: style.gold, rule: style.rule)
         typingAttributes = activeParagraph.location == 0 ? titleAttributes : bodyAttributes
         setNeedsLayout()
     }
@@ -318,7 +346,7 @@ final class ManuscriptUITextView: UITextView {
         let padding = textContainer.lineFragmentPadding
         let width = textContainer.size.width - padding * 2
 
-        // Fleuron under the title, once there is a second line.
+        // Fleuron rule under the title, once there is a second line.
         let firstBreak = string.range(of: "\n")
         if firstBreak.location != NSNotFound, firstBreak.location > 0 {
             let titleGlyphs = layoutManager.glyphRange(
@@ -327,10 +355,10 @@ final class ManuscriptUITextView: UITextView {
             )
             let lastGlyph = max(0, NSMaxRange(titleGlyphs) - 1)
             let used = layoutManager.lineFragmentUsedRect(forGlyphAt: lastGlyph, effectiveRange: nil)
-            flourishView.frame = CGRect(x: origin.x + padding, y: origin.y + used.maxY + 12, width: width, height: 22)
-            flourishView.isHidden = false
+            titleRule.frame = CGRect(x: origin.x + padding, y: origin.y + used.maxY + 14, width: width, height: 22)
+            titleRule.isHidden = false
         } else {
-            flourishView.isHidden = true
+            titleRule.isHidden = true
         }
 
         // Illuminated initial: a box two lines tall, with text flowing around it.
@@ -338,12 +366,12 @@ final class ManuscriptUITextView: UITextView {
             let side = ceil(style.bodyFont.lineHeight * 2 + bodyLineSpacing) - 2
             let glyph = layoutManager.glyphIndexForCharacter(at: index)
             let line = layoutManager.lineFragmentRect(forGlyphAt: glyph, effectiveRange: nil)
-            let exclusion = CGRect(x: 0, y: line.minY, width: padding + side + 10, height: side + 4)
-            if abs(exclusion.minY - exclusionRect.minY) > 0.5 || abs(exclusion.width - exclusionRect.width) > 0.5 || exclusionRect.isNull {
+            let exclusion = CGRect(x: 0, y: line.minY, width: padding + side + 11, height: side + 4)
+            if exclusionRect.isNull || abs(exclusion.minY - exclusionRect.minY) > 0.5 || abs(exclusion.width - exclusionRect.width) > 0.5 {
                 exclusionRect = exclusion
                 textContainer.exclusionPaths = [UIBezierPath(rect: exclusion)]
             }
-            initialView.frame = CGRect(x: origin.x + padding, y: origin.y + line.minY + 3, width: side, height: side)
+            initialView.frame = CGRect(x: origin.x + padding, y: origin.y + line.minY + 4, width: side, height: side)
             initialView.isHidden = false
         } else {
             if !textContainer.exclusionPaths.isEmpty {
@@ -351,6 +379,46 @@ final class ManuscriptUITextView: UITextView {
             }
             exclusionRect = .null
             initialView.isHidden = true
+        }
+
+        // Drawn checkboxes over the hidden ☐ / ☑ characters.
+        while checkViews.count < checkEntries.count {
+            let view = CheckboxMarkView()
+            addSubview(view)
+            checkViews.append(view)
+        }
+        for (position, view) in checkViews.enumerated() {
+            guard position < checkEntries.count, checkEntries[position].index < string.length else {
+                view.isHidden = true
+                continue
+            }
+            let entry = checkEntries[position]
+            let glyph = layoutManager.glyphIndexForCharacter(at: entry.index)
+            let line = layoutManager.lineFragmentRect(forGlyphAt: glyph, effectiveRange: nil)
+            let location = layoutManager.location(forGlyphAt: glyph)
+            let baseline = line.minY + location.y
+            let centerY = baseline - style.bodyFont.xHeight / 2 - 1
+            view.frame = CGRect(x: origin.x + line.minX + location.x, y: origin.y + centerY - checkSide / 2, width: checkSide, height: checkSide)
+            view.configure(index: entry.index, checked: entry.checked, ink: entry.dimmed ? style.dimInk : style.rubric)
+            view.isHidden = false
+        }
+
+        // Fleuron rules over hidden ❦ lines.
+        while ruleViews.count < fleuronIndices.count {
+            let view = FlourishRuleView()
+            addSubview(view)
+            ruleViews.append(view)
+        }
+        for (position, view) in ruleViews.enumerated() {
+            guard position < fleuronIndices.count, fleuronIndices[position] < string.length else {
+                view.isHidden = true
+                continue
+            }
+            let glyph = layoutManager.glyphIndexForCharacter(at: fleuronIndices[position])
+            let used = layoutManager.lineFragmentUsedRect(forGlyphAt: glyph, effectiveRange: nil)
+            view.frame = CGRect(x: origin.x + padding, y: origin.y + used.midY - 11, width: width, height: 22)
+            view.configure(fleuron: style.gold, rule: style.rule)
+            view.isHidden = false
         }
     }
 
@@ -367,24 +435,9 @@ final class ManuscriptUITextView: UITextView {
     }
 
     fileprivate func checkboxIndex(at point: CGPoint) -> Int? {
-        let string = storage.string as NSString
-        guard string.length > 0 else { return nil }
-        let containerPoint = CGPoint(x: point.x - textContainerInset.left, y: point.y - textContainerInset.top)
-        var fraction: CGFloat = 0
-        let hit = layoutManager.characterIndex(
-            for: containerPoint,
-            in: textContainer,
-            fractionOfDistanceBetweenInsertionPoints: &fraction
-        )
-        for candidate in [hit, hit - 1, hit + 1] where candidate >= 0 && candidate < string.length {
-            let character = string.character(at: candidate)
-            guard character == 0x2610 || character == 0x2611 else { continue }
-            let paragraph = string.paragraphRange(for: NSRange(location: candidate, length: 0))
-            guard paragraph.location == candidate, paragraph.location > 0 else { continue }
-            let glyphs = layoutManager.glyphRange(forCharacterRange: NSRange(location: candidate, length: 1), actualCharacterRange: nil)
-            let box = layoutManager.boundingRect(forGlyphRange: glyphs, in: textContainer).insetBy(dx: -12, dy: -8)
-            if box.contains(containerPoint) {
-                return candidate
+        for (position, view) in checkViews.enumerated() where !view.isHidden && position < checkEntries.count {
+            if view.frame.insetBy(dx: -12, dy: -9).contains(point) {
+                return checkEntries[position].index
             }
         }
         return nil
@@ -452,18 +505,30 @@ private final class GestureGate: NSObject, UIGestureRecognizerDelegate {
     }
 }
 
-/// The illuminated initial drawn over the hidden first letter.
+/// The gilded initial drawn over the hidden first letter.
 final class IlluminatedCapView: UIView {
     private let label = UILabel()
     private var baseFont = UIFont.systemFont(ofSize: 40)
+    private var top = UIColor.red
+    private var deep = UIColor.red
+    private var bottom = UIColor.red
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         isUserInteractionEnabled = false
         isAccessibilityElement = false
-        layer.borderWidth = 1.5
+        isOpaque = false
+        contentMode = .redraw
         label.textAlignment = .center
+        label.layer.shadowColor = UIColor(hex: 0x280C04).cgColor
+        label.layer.shadowOpacity = 0.65
+        label.layer.shadowRadius = 0
+        label.layer.shadowOffset = CGSize(width: 0, height: 1)
         addSubview(label)
+        layer.shadowColor = UIColor(hex: 0x3C2610).cgColor
+        layer.shadowOpacity = 0.25
+        layer.shadowRadius = 2
+        layer.shadowOffset = CGSize(width: 0, height: 1)
     }
 
     @available(*, unavailable)
@@ -471,26 +536,124 @@ final class IlluminatedCapView: UIView {
         fatalError("init(coder:) is not supported")
     }
 
-    func configure(letter: String, font: UIFont, ink: UIColor, gold: UIColor, surface: UIColor) {
+    func configure(letter: String, font: UIFont, top: UIColor, deep: UIColor, bottom: UIColor) {
         label.text = letter
         baseFont = font
-        label.textColor = ink
-        layer.borderColor = gold.cgColor
-        backgroundColor = surface
+        self.top = top
+        self.deep = deep
+        self.bottom = bottom
         setNeedsLayout()
+        setNeedsDisplay()
     }
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        label.font = baseFont.withSize(bounds.height * 0.8)
-        label.frame = bounds.offsetBy(dx: 0, dy: bounds.height * 0.05)
+        let side = bounds.height
+        guard side > 0 else { return }
+        label.font = baseFont.withSize(side * 0.74)
+        label.frame = bounds.offsetBy(dx: 0, dy: side * 0.06)
+        label.textColor = UIColor(patternImage: Self.goldLeaf(height: side))
+    }
+
+    override func draw(_ rect: CGRect) {
+        guard let context = UIGraphicsGetCurrentContext() else { return }
+        let colors = [top.cgColor, deep.cgColor, bottom.cgColor] as CFArray
+        if let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: [0, 0.52, 1]) {
+            context.drawLinearGradient(gradient, start: .zero, end: CGPoint(x: bounds.maxX, y: bounds.maxY), options: [])
+        }
+        context.setFillColor(UIColor(hex: 0xFFEECD, alpha: 0.24).cgColor)
+        let spacing: CGFloat = 7
+        var y = spacing / 2
+        while y < bounds.maxY {
+            var x = spacing / 2
+            while x < bounds.maxX {
+                context.fillEllipse(in: CGRect(x: x - 0.8, y: y - 0.8, width: 1.6, height: 1.6))
+                x += spacing
+            }
+            y += spacing
+        }
+        context.setStrokeColor(Palette.giltUI.cgColor)
+        context.setLineWidth(1.6)
+        context.stroke(bounds.insetBy(dx: 0.8, dy: 0.8))
+        context.setStrokeColor(UIColor(hex: 0xE9C779, alpha: 0.45).cgColor)
+        context.setLineWidth(1)
+        context.stroke(bounds.insetBy(dx: 3.5, dy: 3.5))
+    }
+
+    /// A vertical gold-leaf gradient used as the letter's color.
+    private static func goldLeaf(height: CGFloat) -> UIImage {
+        let size = CGSize(width: 2, height: max(1, height))
+        return UIGraphicsImageRenderer(size: size).image { context in
+            let colors = [0xFFF4CF, 0xEBC66C, 0xB8862B, 0xF4D88E, 0xC99A3C].map { UIColor(hex: UInt32($0)).cgColor } as CFArray
+            if let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: [0, 0.32, 0.6, 0.84, 1]) {
+                context.cgContext.drawLinearGradient(gradient, start: .zero, end: CGPoint(x: 0, y: size.height), options: [])
+            }
+        }
     }
 }
 
-/// Hairline — ❦ — hairline, drawn beneath the title.
+/// A drawn checkbox. The tick is drawn on like a pen stroke.
+final class CheckboxMarkView: UIView {
+    private let tick = CAShapeLayer()
+    private var representedIndex: Int?
+    private var isChecked = false
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isUserInteractionEnabled = false
+        isAccessibilityElement = false
+        backgroundColor = .clear
+        layer.borderWidth = 1.7
+        layer.cornerRadius = 3.5
+        tick.fillColor = nil
+        tick.lineWidth = 2.6
+        tick.lineCap = .round
+        tick.lineJoin = .round
+        tick.strokeEnd = 0
+        layer.addSublayer(tick)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) is not supported")
+    }
+
+    func configure(index: Int, checked: Bool, ink: UIColor) {
+        layer.borderColor = ink.cgColor
+        tick.strokeColor = ink.cgColor
+        let animate = representedIndex == index && checked && !isChecked && !UIAccessibility.isReduceMotionEnabled
+        representedIndex = index
+        isChecked = checked
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        tick.strokeEnd = checked ? 1 : 0
+        CATransaction.commit()
+        if animate {
+            let draw = CABasicAnimation(keyPath: "strokeEnd")
+            draw.fromValue = 0
+            draw.toValue = 1
+            draw.duration = 0.28
+            draw.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            tick.add(draw, forKey: "draw")
+        }
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let w = bounds.width, h = bounds.height
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: w * 0.2, y: h * 0.52))
+        path.addLine(to: CGPoint(x: w * 0.41, y: h * 0.73))
+        path.addLine(to: CGPoint(x: w * 0.84, y: h * 0.24))
+        tick.frame = bounds
+        tick.path = path.cgPath
+    }
+}
+
+/// Hairline — ❦ — hairline, fading at the ends.
 final class FlourishRuleView: UIView {
-    private let leftRule = UIView()
-    private let rightRule = UIView()
+    private let leftRule = CAGradientLayer()
+    private let rightRule = CAGradientLayer()
     private let fleuron = UILabel()
 
     override init(frame: CGRect) {
@@ -498,10 +661,14 @@ final class FlourishRuleView: UIView {
         isUserInteractionEnabled = false
         isAccessibilityElement = false
         fleuron.text = Glyph.fleuron
-        fleuron.font = .systemFont(ofSize: 17)
+        fleuron.font = .systemFont(ofSize: 18)
         fleuron.textAlignment = .center
-        addSubview(leftRule)
-        addSubview(rightRule)
+        leftRule.startPoint = CGPoint(x: 0, y: 0.5)
+        leftRule.endPoint = CGPoint(x: 1, y: 0.5)
+        rightRule.startPoint = CGPoint(x: 0, y: 0.5)
+        rightRule.endPoint = CGPoint(x: 1, y: 0.5)
+        layer.addSublayer(leftRule)
+        layer.addSublayer(rightRule)
         addSubview(fleuron)
     }
 
@@ -512,8 +679,8 @@ final class FlourishRuleView: UIView {
 
     func configure(fleuron color: UIColor, rule: UIColor) {
         fleuron.textColor = color
-        leftRule.backgroundColor = rule
-        rightRule.backgroundColor = rule
+        leftRule.colors = [rule.withAlphaComponent(0).cgColor, rule.cgColor]
+        rightRule.colors = [rule.cgColor, rule.withAlphaComponent(0).cgColor]
     }
 
     override func layoutSubviews() {
@@ -521,10 +688,13 @@ final class FlourishRuleView: UIView {
         let glyphWidth: CGFloat = 28
         let gap: CGFloat = 8
         let midX = bounds.midX
-        let midY = bounds.midY
+        let midY = round(bounds.midY)
         fleuron.frame = CGRect(x: midX - glyphWidth / 2, y: 0, width: glyphWidth, height: bounds.height)
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
         leftRule.frame = CGRect(x: 0, y: midY, width: max(0, midX - glyphWidth / 2 - gap), height: 1)
         let rightStart = midX + glyphWidth / 2 + gap
         rightRule.frame = CGRect(x: rightStart, y: midY, width: max(0, bounds.width - rightStart), height: 1)
+        CATransaction.commit()
     }
 }

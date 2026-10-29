@@ -5,6 +5,7 @@ import SwiftUI
 struct AshesView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scribe) private var scribe
+    @Environment(\.dismiss) private var dismiss
 
     @Query(filter: #Predicate<Scroll> { $0.burnedAt != nil }, sort: \Scroll.updatedAt, order: .reverse)
     private var ashes: [Scroll]
@@ -13,33 +14,47 @@ struct AshesView: View {
 
     var body: some View {
         List {
-            Text("Burned scrolls rest here for thirty days. Restore one by swiping right.")
-                .font(scribe.body(16, italic: true, relativeTo: .footnote))
-                .foregroundStyle(Palette.muted)
-                .listRowBackground(Palette.ground)
-                .listRowSeparator(.hidden)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("The Ashes")
+                    .font(Typeface.display(30, .semibold, relativeTo: .largeTitle))
+                    .foregroundStyle(Palette.ink)
+                    .accessibilityAddTraits(.isHeader)
+                Text("Burned scrolls rest here for thirty days, then turn to dust. Swipe right to restore one.")
+                    .font(scribe.body(16, italic: true, relativeTo: .footnote))
+                    .foregroundStyle(Palette.muted)
+            }
+            .padding(.bottom, 8)
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
 
             ForEach(ashes) { scroll in
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(scroll.displayTitle)
-                        .font(scribe.body(19, .semibold, relativeTo: .headline))
-                        .foregroundStyle(Palette.ink)
-                        .lineLimit(1)
-                    Text(dustLine(scroll))
-                        .font(Typeface.display(11, .regular, relativeTo: .caption))
-                        .tracking(1.2)
-                        .foregroundStyle(Palette.muted)
+                VStack(spacing: 0) {
+                    HStack(spacing: 14) {
+                        Image(systemName: "flame")
+                            .font(.system(size: 18))
+                            .foregroundStyle(Palette.dim)
+                            .frame(width: 30)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(scroll.displayTitle)
+                                .font(scribe.body(19, .semibold, relativeTo: .headline))
+                                .foregroundStyle(Palette.ink)
+                                .lineLimit(1)
+                            SmallCaps(dustLine(scroll))
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.vertical, 14)
+                    FadingRule()
                 }
-                .padding(.vertical, 6)
-                .listRowBackground(Palette.ground)
-                .listRowSeparatorTint(Palette.rule)
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
                 .swipeActions(edge: .leading) {
                     Button {
                         restore(scroll)
                     } label: {
                         Label("Restore", systemImage: "arrow.uturn.backward")
                     }
-                    .tint(scribe.rubric)
+                    .tint(scribe.ink.deep)
                 }
                 .swipeActions(edge: .trailing) {
                     Button(role: .destructive) {
@@ -64,30 +79,42 @@ struct AshesView: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
-        .background(Palette.ground.ignoresSafeArea())
+        .background(ParchmentBackground())
+        .safeAreaInset(edge: .top, spacing: 0) {
+            HStack {
+                Button {
+                    dismiss()
+                } label: {
+                    GlassBackLabel(title: "Chamber")
+                }
+                .buttonStyle(GlassButtonStyle())
+                Spacer()
+                Button("Empty") { confirmEmpty = true }
+                    .font(scribe.body(18, .semibold))
+                    .foregroundStyle(ashes.isEmpty ? Palette.dim : Palette.ember)
+                    .frame(minHeight: 44)
+                    .disabled(ashes.isEmpty)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 6)
+        }
         .overlay {
             if ashes.isEmpty {
                 VStack(spacing: 10) {
                     Image(systemName: "flame")
-                        .font(.system(size: 34))
-                        .foregroundStyle(Palette.gold)
+                        .font(.system(size: 36))
+                        .foregroundStyle(Palette.dim)
                     Text("The hearth is cold")
-                        .font(Typeface.display(18))
+                        .font(Typeface.display(19, .semibold))
                         .foregroundStyle(Palette.ink)
                     Text("No scroll has been burned.")
                         .font(scribe.body(17, italic: true))
                         .foregroundStyle(Palette.muted)
                 }
+                .allowsHitTesting(false)
             }
         }
-        .navigationTitle("The Ashes")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Empty", role: .destructive) { confirmEmpty = true }
-                    .disabled(ashes.isEmpty)
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
         .confirmationDialog("Destroy every burned scroll?", isPresented: $confirmEmpty, titleVisibility: .visible) {
             Button("Destroy forever", role: .destructive) {
                 for scroll in ashes {
@@ -107,11 +134,10 @@ struct AshesView: View {
     }
 
     private func dustLine(_ scroll: Scroll) -> String {
-        let days = scroll.daysUntilDust
-        switch days {
-        case 0: return "TURNS TO DUST TODAY"
-        case 1: return "TURNS TO DUST TOMORROW"
-        default: return "TURNS TO DUST IN \(days) DAYS"
+        switch scroll.daysUntilDust {
+        case 0: return "Turns to dust today"
+        case 1: return "Turns to dust tomorrow"
+        case let days: return "Dust in \(ScribeDate.spelled(days).lowercased()) days"
         }
     }
 }

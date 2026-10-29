@@ -25,6 +25,11 @@ final class Scroll {
 extension Scroll {
     static let ashesLifetime: TimeInterval = 30 * 24 * 60 * 60
 
+    /// Seeds this scroll's wax seal, so it always looks the same.
+    var sealSeed: String {
+        "scroll-\(Int(createdAt.timeIntervalSince1970 * 1000))"
+    }
+
     var titleLine: String {
         String(text.prefix(while: { $0 != "\n" }))
             .trimmingCharacters(in: .whitespaces)

@@ -4,6 +4,7 @@ import SwiftUI
 @main
 struct ScriptoriumApp: App {
     @State private var sealKeeper = SealKeeper()
+    @State private var herald = Herald()
 
     init() {
         FontRegistrar.registerBundledFonts()
@@ -14,6 +15,7 @@ struct ScriptoriumApp: App {
         WindowGroup {
             RootView()
                 .environment(sealKeeper)
+                .environment(herald)
         }
         .modelContainer(for: Scroll.self)
     }
@@ -29,6 +31,10 @@ struct RootView: View {
 
     var body: some View {
         ScrollsView()
+            .overlay(alignment: .bottom) {
+                HeraldBanner()
+                    .padding(.bottom, 110)
+            }
             .scribeStyle()
             .fullScreenCover(isPresented: showWelcome) {
                 WelcomeView { hasSeenWelcome = true }
@@ -72,10 +78,8 @@ struct RootView: View {
 private struct PrivacyCover: View {
     var body: some View {
         ZStack {
-            Palette.ground.ignoresSafeArea()
-            WaxSeal(size: 120) {
-                SealMonogram(size: 120)
-            }
+            ParchmentBackground()
+            WaxSealImage(size: 132, seed: "privacy")
         }
     }
 }

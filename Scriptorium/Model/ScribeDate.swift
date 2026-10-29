@@ -41,6 +41,26 @@ enum ScribeDate {
         return "\(day) · \(time(date, canonical: canonical, calendar: calendar))"
     }
 
+    /// "Today", "Yesterday" or "26 October".
+    static func day(_ date: Date, calendar: Calendar = .current) -> String {
+        if calendar.isDateInToday(date) { return "Today" }
+        if calendar.isDateInYesterday(date) { return "Yesterday" }
+        if calendar.isDate(date, equalTo: .now, toGranularity: .year) {
+            return date.formatted(.dateTime.day().month(.wide))
+        }
+        return date.formatted(.dateTime.day().month(.wide).year())
+    }
+
+    /// "28th".
+    static func ordinal(_ number: Int) -> String {
+        ordinalFormatter.string(from: NSNumber(value: number)) ?? "\(number)"
+    }
+
+    /// "Twenty-five", for minutes and counts written out in words.
+    static func spelled(_ number: Int) -> String {
+        (spellOutFormatter.string(from: NSNumber(value: number)) ?? "\(number)").capitalizedFirst
+    }
+
     /// "The 28th of October · Vespers".
     static func long(_ date: Date, canonical: Bool, calendar: Calendar = .current) -> String {
         let day = calendar.component(.day, from: date)
@@ -61,7 +81,7 @@ enum ScribeDate {
     /// "Five" for small counts, digits for larger ones.
     static func countWord(_ count: Int) -> String {
         guard count <= 20 else { return "\(count)" }
-        return spellOutFormatter.string(from: NSNumber(value: count))?.capitalized ?? "\(count)"
+        return spelled(count)
     }
 
     private static let ordinalFormatter: NumberFormatter = {
@@ -75,4 +95,11 @@ enum ScribeDate {
         formatter.numberStyle = .spellOut
         return formatter
     }()
+}
+
+extension String {
+    /// Capitalizes only the first letter: "twenty-five" becomes "Twenty-five".
+    var capitalizedFirst: String {
+        prefix(1).uppercased() + dropFirst()
+    }
 }
