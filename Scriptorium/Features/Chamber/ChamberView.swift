@@ -280,7 +280,7 @@ private struct ParchmentSwatch: View {
                     case .bySun:
                         MiniPage(ground: Color(hex: 0xF3E9D2), ink: Color(hex: 0x2A1F17), line: Color(hex: 0x8E7B62))
                         MiniPage(ground: Color(hex: 0x1A130D), ink: Color(hex: 0xECDDBE), line: Color(hex: 0x7D6D58))
-                            .mask(DiagonalHalf())
+                            .mask { DiagonalHalf() }
                     }
                 }
                 .aspectRatio(0.78, contentMode: .fit)
@@ -387,7 +387,7 @@ struct CodexExport: Transferable {
     let markdown: String
 
     static var transferRepresentation: some TransferRepresentation {
-        DataRepresentation(exportedContentType: UTType(filenameExtension: "md") ?? .plainText) { export in
+        DataRepresentation(exportedContentType: UTType(filenameExtension: "md", conformingTo: .plainText) ?? .plainText) { export in
             Data(export.markdown.utf8)
         }
         .suggestedFileName("Scriptorium.md")

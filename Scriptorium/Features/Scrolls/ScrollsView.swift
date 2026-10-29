@@ -21,6 +21,9 @@ struct ScrollsView: View {
         NavigationStack(path: $path) {
             ZStack(alignment: .bottomTrailing) {
                 ParchmentBackground()
+                SwipeBackEnabler()
+                    .frame(width: 0, height: 0)
+                    .accessibilityHidden(true)
 
                 List {
                     header

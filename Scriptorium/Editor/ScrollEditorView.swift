@@ -221,8 +221,11 @@ struct ScrollEditorView: View {
         scroll.isSealed = true
         try? modelContext.save()
         sealKeeper.open(scroll)
-        stamping = true
         Task {
+            // Render the seal first, so the stamp lands as real wax, not a placeholder.
+            let pixels = Int((SealStamp.size * max(2, displayScale)).rounded())
+            _ = await WaxSealRenderer.image(WaxSealSpec(ink: scribe.ink, seed: scroll.sealSeed, pixels: pixels))
+            stamping = true
             try? await Task.sleep(for: .milliseconds(1300))
             withAnimation(.easeOut(duration: 0.3)) { stamping = false }
         }
@@ -259,6 +262,8 @@ struct ScrollEditorView: View {
 
 /// The wax seal pressed onto the page when a scroll is sealed.
 private struct SealStamp: View {
+    static let size: CGFloat = 196
+
     let seed: String
 
     @State private var landed = false
@@ -268,7 +273,7 @@ private struct SealStamp: View {
         ZStack {
             RadialGradient(colors: [Color.black.opacity(landed ? 0.16 : 0), .clear], center: .center, startRadius: 0, endRadius: 320)
                 .ignoresSafeArea()
-            WaxSealImage(size: 196, seed: seed)
+            WaxSealImage(size: Self.size, seed: seed)
                 .scaleEffect(x: landed ? (settled ? 1 : 0.96) : 1.7, y: landed ? (settled ? 1 : 1.03) : 1.7)
                 .rotationEffect(.degrees(landed ? 0 : -14))
                 .opacity(landed ? 1 : 0)

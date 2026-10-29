@@ -106,9 +106,11 @@ struct ManuscriptTextView: UIViewRepresentable {
 
         func textViewDidChangeSelection(_ textView: UITextView) {
             guard let textView = textView as? ManuscriptUITextView,
-                  textView.manuscriptStyle?.focusMode == true,
-                  textView.markedTextRange == nil else { return }
-            textView.applyStyle()
+                  textView.manuscriptStyle?.focusMode == true else { return }
+            // Defer: UIKit may still be processing an edit when the selection moves.
+            DispatchQueue.main.async {
+                textView.refreshFocusIfNeeded()
+            }
         }
 
         func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
@@ -153,6 +155,7 @@ final class ManuscriptUITextView: UITextView {
     private var exclusionRect = CGRect.null
     private var bodyLineSpacing: CGFloat = 6
     private var checkSide: CGFloat = 23
+    private var styledActiveParagraph = -1
 
     private static let titleGap: CGFloat = 50
 
@@ -220,6 +223,16 @@ final class ManuscriptUITextView: UITextView {
 
     // MARK: Styling
 
+    /// In focus mode, re-ink the page only when the caret moves to another paragraph.
+    func refreshFocusIfNeeded() {
+        guard manuscriptStyle?.focusMode == true, markedTextRange == nil else { return }
+        let string = storage.string as NSString
+        let caret = min(selectedRange.location, string.length)
+        if string.paragraphRange(for: NSRange(location: caret, length: 0)).location != styledActiveParagraph {
+            applyStyle()
+        }
+    }
+
     func applyStyle() {
         guard let style = manuscriptStyle else { return }
         tintColor = style.rubric
@@ -230,6 +243,7 @@ final class ManuscriptUITextView: UITextView {
         let full = NSRange(location: 0, length: string.length)
         let caret = min(selectedRange.location, string.length)
         let activeParagraph = string.paragraphRange(for: NSRange(location: caret, length: 0))
+        styledActiveParagraph = activeParagraph.location
 
         bodyLineSpacing = round(style.bodyFont.pointSize * 0.36)
         let bodyParagraph = NSMutableParagraphStyle()
@@ -428,7 +442,10 @@ final class ManuscriptUITextView: UITextView {
         guard recognizer.state == .ended,
               let index = checkboxIndex(at: recognizer.location(in: self)) else { return }
         let string = storage.string as NSString
-        let isChecked = string.character(at: index) == 0x2611
+        guard index < string.length else { return }
+        let character = string.character(at: index)
+        guard character == 0x2610 || character == 0x2611 else { return }
+        let isChecked = character == 0x2611
         replace(NSRange(location: index, length: 1), with: isChecked ? Glyph.box : Glyph.checked)
         notifyChange()
         UISelectionFeedbackGenerator().selectionChanged()
@@ -502,6 +519,13 @@ private final class GestureGate: NSObject, UIGestureRecognizerDelegate {
 
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         shouldBegin(gestureRecognizer)
+    }
+
+    /// The text view's own taps wait for the checkbox tap to fail, so ticking
+    /// a box doesn't also move the caret or raise the keyboard.
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy other: UIGestureRecognizer) -> Bool {
+        guard other is UITapGestureRecognizer, let host = gestureRecognizer.view, let otherView = other.view else { return false }
+        return otherView.isDescendant(of: host)
     }
 }
 

@@ -98,6 +98,7 @@ enum FontRegistrar {
 }
 
 /// Navigation bar styling that matches the manuscript look.
+@MainActor
 enum ChromeAppearance {
     static func apply() {
         let bar = UINavigationBarAppearance()

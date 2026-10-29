@@ -123,6 +123,7 @@ extension View {
 }
 
 /// Applies the chosen parchment to every window, including sheets and UIKit views.
+@MainActor
 enum WindowStyler {
     static func apply(_ parchment: Parchment) {
         for scene in UIApplication.shared.connectedScenes {

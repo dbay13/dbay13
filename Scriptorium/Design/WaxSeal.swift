@@ -83,7 +83,10 @@ enum WaxSealRenderer {
                 let dx = Float(x) + 0.5 - cx, dy = Float(y) + 0.5 - cy
                 let r = (dx * dx + dy * dy).squareRoot()
                 let theta = atan2(dy, dx)
-                var boundary = radius * (1 + 0.028 * sin(3 * theta + phases[0]) + 0.018 * sin(5 * theta + phases[1]) + 0.01 * sin(11 * theta + phases[2]))
+                let wave1: Float = 0.028 * sin(3 * theta + phases[0])
+                let wave2: Float = 0.018 * sin(5 * theta + phases[1])
+                let wave3: Float = 0.01 * sin(11 * theta + phases[2])
+                var boundary = radius * (1 + wave1 + wave2 + wave3)
                 for drip in drips {
                     var gap = abs(theta - drip.angle)
                     if gap > .pi { gap = 2 * .pi - gap }
@@ -326,7 +329,8 @@ struct Mulberry {
         state = state &+ 0x6D2B_79F5
         var t = (state ^ (state >> 15)) &* (1 | state)
         t = (t &+ ((t ^ (t >> 7)) &* (61 | t))) ^ t
-        return Float(t ^ (t >> 14)) / 4_294_967_296
+        // Top 24 bits, so the result stays strictly below 1.
+        return Float((t ^ (t >> 14)) >> 8) / 16_777_216
     }
 }
 
@@ -363,7 +367,7 @@ struct WaxSealImage: View {
 
     @Environment(\.scribe) private var scribe
     @Environment(\.displayScale) private var displayScale
-    @State private var rendered: UIImage?
+    @State private var rendered: (key: String, image: UIImage)?
 
     private var spec: WaxSealSpec {
         WaxSealSpec(ink: ink ?? scribe.ink, emblem: emblem, seed: seed, pixels: Int((size * max(2, displayScale)).rounded()))
@@ -371,7 +375,7 @@ struct WaxSealImage: View {
 
     var body: some View {
         Group {
-            if let image = WaxSealRenderer.cachedImage(spec) ?? rendered {
+            if let image = WaxSealRenderer.cachedImage(spec) ?? (rendered?.key == spec.cacheKey ? rendered?.image : nil) {
                 Image(uiImage: image)
                     .resizable()
                     .interpolation(.high)
@@ -386,7 +390,9 @@ struct WaxSealImage: View {
         .shadow(color: Color(hex: 0x280A04, opacity: 0.35), radius: max(1, size * 0.012), y: max(1, size * 0.012))
         .shadow(color: Color(hex: 0x280A04, opacity: 0.22), radius: max(2, size * 0.05), y: max(2, size * 0.04))
         .task(id: spec) {
-            rendered = await WaxSealRenderer.image(spec)
+            let current = self.spec
+            let image = await WaxSealRenderer.image(current)
+            rendered = (current.cacheKey, image)
         }
         .accessibilityHidden(true)
     }
