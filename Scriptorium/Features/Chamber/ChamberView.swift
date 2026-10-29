@@ -286,7 +286,7 @@ struct CodexExport: Transferable {
     let markdown: String
 
     static var transferRepresentation: some TransferRepresentation {
-        DataRepresentation(exportedContentType: .plainText) { export in
+        DataRepresentation(exportedContentType: UTType(filenameExtension: "md") ?? .plainText) { export in
             Data(export.markdown.utf8)
         }
         .suggestedFileName("Scriptorium.md")

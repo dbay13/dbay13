@@ -111,11 +111,13 @@ struct ManuscriptTextView: UIViewRepresentable {
         }
 
         func textViewDidBeginEditing(_ textView: UITextView) {
-            parent.controller.isEditing = true
+            let controller = parent.controller
+            DispatchQueue.main.async { controller.isEditing = true }
         }
 
         func textViewDidEndEditing(_ textView: UITextView) {
-            parent.controller.isEditing = false
+            let controller = parent.controller
+            DispatchQueue.main.async { controller.isEditing = false }
         }
     }
 }

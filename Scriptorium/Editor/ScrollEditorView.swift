@@ -7,6 +7,7 @@ struct ScrollEditorView: View {
     @Environment(\.scribe) private var scribe
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @Environment(SealKeeper.self) private var sealKeeper
     @Query(filter: #Predicate<Scroll> { $0.burnedAt == nil }) private var allScrolls: [Scroll]
 
@@ -55,7 +56,7 @@ struct ScrollEditorView: View {
             )
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar { toolbar }
+        .toolbar { toolbarItems }
         .overlay {
             if stamping {
                 SealStamp()
@@ -132,7 +133,7 @@ struct ScrollEditorView: View {
     }
 
     @ToolbarContentBuilder
-    private var toolbar: some ToolbarContent {
+    private var toolbarItems: some ToolbarContent {
         ToolbarItemGroup(placement: .topBarTrailing) {
             Button {
                 controller.endEditing()
@@ -187,6 +188,7 @@ struct ScrollEditorView: View {
         }
         controller.endEditing()
         scroll.isSealed = true
+        try? modelContext.save()
         sealKeeper.open(scroll)
         stamping = true
         Task {

@@ -31,7 +31,11 @@ final class QuillFeedback {
         if engine == nil {
             prepareAudio()
         }
-        guard let player, let buffer = scratches.randomElement() else { return }
+        guard let engine, let player, let buffer = scratches.randomElement() else { return }
+        // Calls, Siri and route changes stop the engine; restart it before playing.
+        if !engine.isRunning {
+            do { try engine.start() } catch { return }
+        }
         player.scheduleBuffer(buffer, at: nil, options: .interrupts, completionHandler: nil)
         if !player.isPlaying {
             player.play()
@@ -49,11 +53,8 @@ final class QuillFeedback {
         engine.attach(player)
         engine.connect(player, to: engine.mainMixerNode, format: format)
         scratches = (0..<4).compactMap { Self.makeScratch(format: format, variant: $0) }
-        do {
-            try engine.start()
-        } catch {
-            return
-        }
+        // Kept even if start fails, so setup isn't retried on every keystroke.
+        try? engine.start()
         self.engine = engine
         self.player = player
     }

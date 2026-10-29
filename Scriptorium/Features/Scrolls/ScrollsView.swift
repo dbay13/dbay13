@@ -170,6 +170,8 @@ struct ScrollsView: View {
     private func newScroll() {
         let scroll = Scroll(tome: selectedTome ?? "")
         modelContext.insert(scroll)
+        // Save now so the scroll gets its permanent ID before it is pushed or sealed.
+        try? modelContext.save()
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         path.append(scroll)
     }
