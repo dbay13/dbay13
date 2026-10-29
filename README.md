@@ -1,7 +1,12 @@
 # Scriptorium
 
-A quiet, minimalist note app for iPhone, dressed as a medieval manuscript.
-One page, no clutter, in the spirit of Mononote, with a few touches of its own.
+A private diary for iPhone, dressed as a medieval manuscript and sealed in wax.
+
+> **Direction:** Scriptorium is moving from a note app to a diary: a page for every day, a question when the
+> page is blank, mood tracking through the four humours, and a lock for the whole diary. The web prototype
+> (`prototype/scriptorium.html`) already shows the diary and the Patron offer. The Swift app below still
+> has the note-app home screen and is being brought in line next. The money plan is in
+> [`docs/MONETIZATION.md`](docs/MONETIZATION.md).
 
 - **Scrolls**: each note is one page. Its first line is the title. Notes save as you type.
 - **Illuminated initials**: the first letter of each note is drawn in blackletter inside a gilt frame, and the text flows around it.

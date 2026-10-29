@@ -50,6 +50,7 @@
   --rubric: var(--rubric-d); color-scheme: dark;
 }
 
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body { background: var(--page-bg); color: var(--page-fg); font-family: var(--f-book); }
 * { box-sizing: border-box; }
@@ -166,7 +167,7 @@ img.seal-img { display: block; pointer-events: none; user-select: none; -webkit-
 .page > .fleuron-rule { margin: 16px 0 20px; }
 .manuscript { position: relative; outline: none; font-size: 19.5px; line-height: 1.62; min-height: 220px; caret-color: var(--rubric); overflow-wrap: break-word; font-feature-settings: "liga", "onum"; hyphens: auto; }
 .manuscript > div { margin: 0 0 11px; min-height: 1.62em; }
-.manuscript.is-empty::before { content: "Begin thy scroll beneath\2026"; position: absolute; color: var(--dim); font-style: italic; pointer-events: none; }
+.manuscript.is-empty::before { content: attr(data-placeholder); position: absolute; color: var(--dim); font-style: italic; pointer-events: none; }
 #app:not([data-illuminated="false"]) .manuscript > div.cap::first-letter {
   float: left; font-family: var(--f-initial); font-size: 3.25em; line-height: 0.92; color: #EBC66C;
   text-shadow: 0 1px 0 rgba(40, 12, 4, 0.7), 0 0 1px rgba(255, 240, 200, 0.3);
@@ -390,6 +391,111 @@ button.srow:first-child { border-top: 0; }
 .mpage .m-foot img { width: 64px; height: 64px; margin: -10px -6px -14px 0; }
 .export { width: 100%; min-height: 380px; border: 1px solid var(--rule-strong); border-radius: 12px; background: var(--ground); color: var(--ink); font: 13.5px/1.55 ui-monospace, Menlo, monospace; padding: 14px; resize: vertical; }
 
+
+/* ---------- The Chronicle (diary home) ---------- */
+.chron-head { display: flex; flex-direction: column; padding: 6px 22px 0; }
+.chron-head h1 { margin: 6px 0 2px; font-family: var(--f-display); font-weight: 600; font-size: 34px; line-height: 1.05; }
+.today-card { position: relative; margin: 16px 18px 6px; padding: 20px 20px 18px; border-radius: 18px; background: var(--card); border: 1px solid var(--rule); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 8px 20px var(--shadow); display: flex; flex-direction: column; gap: 8px; }
+.today-card::before { content: ""; position: absolute; inset: 5px; border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent); border-radius: 13px; pointer-events: none; }
+.tc-prompt { margin: 2px 0 0; font-size: 21px; line-height: 1.35; font-style: italic; color: var(--ink); text-wrap: balance; }
+.tc-title { font-size: 21px; font-weight: 600; }
+.tc-preview { font-size: 16.5px; color: var(--ink-soft); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.btn-rubric.small { min-height: 50px; font-size: 13.5px; margin-top: 8px; }
+.cal { margin: 14px 18px 4px; padding: 12px 12px 12px; border-radius: 18px; background: var(--card); border: 1px solid var(--rule); }
+.cal-head { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; text-align: center; margin-bottom: 8px; }
+.cal-head > div { display: flex; flex-direction: column; gap: 3px; }
+.cal-month { font-family: var(--f-display); font-size: 17px; font-weight: 600; }
+.cal-nav { width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; color: var(--rubric); display: grid; place-items: center; padding: 0; }
+.cal-nav:disabled { color: var(--dim); opacity: 0.45; }
+.cal-nav svg { width: 20px; height: 20px; stroke-width: 2; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.cal-dow { text-align: center; font-family: var(--f-display); font-size: 10px; letter-spacing: 0.1em; color: var(--muted); padding-bottom: 2px; }
+.cal-day { position: relative; aspect-ratio: 1; border: 0; border-radius: 50%; background: transparent; font-size: 16px; color: var(--ink-soft); display: grid; place-items: center; padding: 0; font-variant-numeric: lining-nums; }
+.cal-day:disabled { color: var(--dim); opacity: 0.5; }
+.cal-day.kept { background: radial-gradient(circle at 35% 30%, #F6E2A6, #D9AE52 55%, #B8892B); color: #3A2A10; font-weight: 600; box-shadow: inset 0 0 0 1px rgba(120, 80, 20, 0.4), 0 1px 2px var(--shadow); }
+.cal-day.today { box-shadow: inset 0 0 0 2px var(--rubric); color: var(--rubric); font-weight: 600; }
+.cal-day.kept.today { box-shadow: inset 0 0 0 1px rgba(120, 80, 20, 0.4), 0 0 0 2px var(--card), 0 0 0 3.5px var(--rubric); color: #3A2A10; }
+.cal-day img { position: absolute; right: -4px; bottom: -4px; width: 17px; height: 17px; }
+.month-rule { display: flex; align-items: center; gap: 12px; padding: 24px 22px 2px; }
+.month-rule::before, .month-rule::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--rule-strong)); }
+.month-rule::after { background: linear-gradient(90deg, var(--rule-strong), transparent); }
+.dateblock { flex: 0 0 auto; width: 46px; display: flex; flex-direction: column; align-items: center; padding-top: 2px; }
+.dateblock .dow { font-family: var(--f-display); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; color: var(--rubric); }
+.dateblock .dnum { font-family: var(--f-display); font-size: 30px; font-weight: 600; line-height: 1.05; font-variant-numeric: lining-nums; }
+.row-seal { flex: 0 0 auto; width: 42px; height: 42px; align-self: center; }
+.hum { display: inline-flex; align-items: center; gap: 4px; }
+.hum svg { stroke-width: 1.8; }
+.menu-title { padding: 8px 12px 4px; }
+.hum-item { display: flex; align-items: center; gap: 12px; }
+.hum-item > span { display: flex; flex-direction: column; }
+.hum-item small { font-size: 14px; font-style: italic; color: var(--muted); }
+#home-search { padding: 0 18px 6px; }
+#home-search .search { margin-top: 2px; }
+
+/* ---------- The diary lock ---------- */
+.lockscreen { position: absolute; inset: 0; z-index: 85; display: flex; flex-direction: column; align-items: center; text-align: center; transition: opacity 0.4s; }
+.lockscreen.gone { opacity: 0; pointer-events: none; }
+.lock-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 0 36px; }
+.lock-body h2 { margin: 18px 0 0; font-family: var(--f-display); font-size: 24px; font-weight: 600; }
+.lock-body p { margin: 0; font-style: italic; font-size: 18px; color: var(--ink-soft); }
+#lock-seal img { width: 190px; height: 190px; }
+.lockscreen .sealed-foot { width: 100%; }
+
+/* ---------- The Patronage ---------- */
+.patron-banner { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; border: 1px solid color-mix(in srgb, var(--gold) 60%, transparent); border-radius: 18px; padding: 14px 14px 14px 12px; color: var(--ink); font-family: var(--f-body); background: linear-gradient(135deg, color-mix(in srgb, var(--card) 68%, #F4D88E), var(--card)); box-shadow: 0 8px 20px var(--shadow); }
+.patron-banner img { width: 60px; height: 60px; flex: none; }
+.patron-banner b { display: block; font-family: var(--f-display); font-size: 16px; letter-spacing: 0.04em; }
+.patron-banner .sub { display: block; font-size: 15px; color: var(--ink-soft); font-style: italic; line-height: 1.3; margin-top: 2px; }
+.patron-banner > svg { width: 16px; height: 16px; stroke-width: 2; color: var(--muted); flex: none; margin-left: auto; }
+.patron-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+.patron-hero img { width: 196px; height: 196px; }
+.patron-hero h1 { margin: 4px 0 0; font-family: var(--f-display); font-size: 28px; font-weight: 600; }
+.patron-hero p { margin: 0; font-size: 18px; font-style: italic; color: var(--ink-soft); }
+.mono-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; font-size: 18px; }
+.mono-input { width: 60px; height: 54px; border: 1.5px solid var(--gold); border-radius: 12px; background: var(--ground); text-align: center; font-family: var(--f-initial); font-size: 34px; color: var(--rubric); padding: 4px 0 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0 14px; }
+.chip { min-height: 38px; border: 1px solid var(--rule-strong); border-radius: 19px; background: transparent; padding: 0 14px; font-family: var(--f-body); font-size: 16px; color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+.chip svg { width: 13px; height: 13px; stroke-width: 2.2; opacity: 0.7; }
+.waxes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px 2px; }
+.waxes .inkwell { font-size: 13.5px; }
+.waxes .drop, .waxes .drop img { width: 46px; height: 46px; }
+.waxes .lockmark { position: absolute; right: -3px; bottom: -3px; width: 19px; height: 19px; border-radius: 10px; background: var(--ink); color: var(--ground); display: grid; place-items: center; }
+.waxes .lockmark svg { width: 11px; height: 11px; stroke-width: 2.4; }
+.perk { display: flex; gap: 14px; align-items: flex-start; padding: 13px 0; }
+.perk + .perk { border-top: 1px solid var(--rule); }
+.perk .pi2 { flex: none; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--rubric-deep); color: #F8F0DD; font-family: var(--f-initial); font-size: 22px; padding-top: 2px; }
+.perk .pi2 svg { width: 19px; height: 19px; stroke-width: 1.8; }
+.perk b { display: block; font-size: 18px; font-weight: 600; }
+.perk span { font-size: 15.5px; color: var(--ink-soft); line-height: 1.35; }
+.perk em { font-style: normal; font-family: var(--f-display); font-size: 9.5px; letter-spacing: 0.14em; color: var(--rubric); margin-left: 6px; vertical-align: 2px; }
+.price-note { text-align: center; font-size: 15px; font-style: italic; color: var(--muted); margin: 2px 0 0; }
+.shelf { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 10px; scrollbar-width: none; scroll-snap-type: x mandatory; }
+.shelf::-webkit-scrollbar { display: none; }
+.signet { flex: 0 0 186px; scroll-snap-align: start; border-radius: 16px; background: var(--card); border: 1px solid var(--rule); padding: 14px; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; }
+.signet .seals { display: flex; justify-content: center; height: 86px; align-items: center; }
+.signet .seals img { width: 78px; height: 78px; }
+.signet .seals img + img { margin-left: -14px; }
+.signet b { font-size: 17px; }
+.signet span { font-size: 14.5px; color: var(--ink-soft); font-style: italic; line-height: 1.3; flex: 1; }
+.signet .ribbon-tag { position: absolute; top: 10px; right: 0; background: #2A2026; color: #EBC66C; font-family: var(--f-display); font-style: normal; font-size: 9.5px; letter-spacing: 0.14em; padding: 4px 8px; border-radius: 4px 0 0 4px; flex: none; }
+.buy { margin-top: 6px; min-height: 40px; border-radius: 20px; border: 1.5px solid var(--rubric); background: transparent; color: var(--rubric); font-family: var(--f-display); font-size: 12.5px; font-weight: 700; letter-spacing: 0.1em; }
+.buy:disabled { border-color: var(--rule-strong); color: var(--muted); }
+.workshop { display: flex; gap: 14px; align-items: flex-start; padding: 16px 0; }
+.workshop + .workshop { border-top: 1px solid var(--rule); }
+.workshop .art { flex: none; width: 64px; height: 64px; border-radius: 12px; display: grid; place-items: center; background: var(--surface); color: var(--gold); }
+.workshop .art svg { width: 34px; height: 34px; stroke-width: 1.4; }
+.workshop .art img { width: 56px; height: 56px; }
+.workshop b { display: block; font-size: 17.5px; }
+.workshop span { display: block; font-size: 15px; color: var(--ink-soft); line-height: 1.3; }
+.workshop .price { font-family: var(--f-display); font-size: 10.5px; letter-spacing: 0.14em; color: var(--rubric); margin-top: 5px; }
+.notify { flex: none; align-self: flex-start; margin-top: 10px; min-height: 36px; padding: 0 12px; border-radius: 18px; border: 1px solid var(--rule-strong); background: transparent; font-size: 14.5px; color: var(--ink); font-family: var(--f-body); }
+.notify[aria-pressed="true"] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+.candles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 12px 0 14px; }
+.candles button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 4px; border-radius: 14px; border: 1px solid var(--rule); background: var(--ground); color: var(--ink); font-family: var(--f-body); font-size: 14.5px; line-height: 1.2; }
+.candles button b { font-family: var(--f-display); font-size: 13px; letter-spacing: 0.06em; }
+.candles svg { width: 26px; height: 26px; color: var(--gold); }
+
 @media (prefers-reduced-motion: reduce) {
   .view, .welcome, .toast, .row-main, .wax-body, .switch span, .tab::after, .tab::before { transition: none; }
   .flame, .vigil .halo, .faceid-card .scan, .stamp img, .rise, .menu, .modal, .vigil.spent .smoke { animation: none; }
@@ -400,49 +506,45 @@ button.srow:first-child { border-top: 0; }
   <aside class="guide">
     <span class="eyebrow">PROTOTYPE · IPHONE</span>
     <h1>SCRIPTORIUM</h1>
-    <p>A quiet notebook dressed as a medieval manuscript. Everything on the right works.</p>
+    <p>A private diary, sealed in wax. Everything on the right works.</p>
     <ul>
-      <li>Press the wax seal to begin a new scroll. Its first line is the title.</li>
-      <li>Tap a box to tick it off. Return adds the next item.</li>
-      <li>Swipe a scroll left to burn it, right to seal it.</li>
+      <li>Begin today's page from the card at the top. A question waits when the page is blank.</li>
+      <li>Tap a gilt day in the calendar to open it; tap an empty day to write for it.</li>
+      <li>Mark the day's humour with the quartered circle in the toolbar.</li>
       <li>Open <em>Letters Unsent</em> and break its seal.</li>
-      <li>Inside a scroll, light the candle to begin a vigil.</li>
-      <li>Open the Chamber to change parchment and wax.</li>
+      <li>In the Chamber, become a Patron: type thine initial and watch thy seal being made.</li>
+      <li>Turn on "Seal the diary on opening", then switch tabs and come back.</li>
     </ul>
-    <p class="fine">Face ID is simulated. Scrolls you write are kept in this browser only.</p>
+    <p class="fine">Face ID and purchases are simulated; no money is taken. Pages are kept in this browser only.</p>
   </aside>
 
   <div class="device">
     <div id="app" data-parchment="vellum" data-ink="vermilion" data-hand="book" data-illuminated="true">
 
       <!-- Home -->
-      <section class="view paper" id="v-home" aria-label="Thy Scrolls">
+      <section class="view paper" id="v-home" aria-label="Thy Chronicle">
         <div class="topbar">
           <div class="brand"><img class="seal-img" id="brand-seal" width="34" height="34" alt=""><span class="label">Scriptorium</span></div>
           <div class="group">
-            <button class="glass" id="btn-search" aria-label="Search scrolls" aria-expanded="false"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
+            <button class="glass" id="btn-search" aria-label="Search thy diary" aria-expanded="false"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
             <button class="glass" id="btn-chamber" aria-label="The Chamber (settings)"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
           </div>
         </div>
-        <div class="home-head">
-          <span class="small-caps" id="home-date"></span>
-          <h1>Thy Scrolls</h1>
-          <p class="subtitle" id="home-sub"></p>
-          <label class="search" id="search-box" hidden>
+        <div id="home-search" hidden>
+          <label class="search">
             <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
-            <input id="search" type="search" placeholder="Search thy scrolls" autocomplete="off" aria-label="Search thy scrolls">
+            <input id="search" type="search" placeholder="Search thy diary" autocomplete="off" aria-label="Search thy diary">
           </label>
-          <div class="tabs" id="tabs" role="group" aria-label="Tomes"></div>
         </div>
         <div class="list" id="list"></div>
         <div class="home-fade"></div>
-        <button class="fab" id="btn-new" aria-label="New scroll"><img class="seal-img" id="fab-seal" alt=""></button>
+        <button class="fab" id="btn-new" aria-label="New entry"><img class="seal-img" id="fab-seal" alt=""></button>
       </section>
 
       <!-- Editor -->
       <section class="view paper offright" id="v-editor" aria-label="Scroll" hidden>
         <div class="topbar">
-          <button class="glass back" data-back><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Scrolls</button>
+          <button class="glass back" data-back><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Chronicle</button>
           <div class="group">
             <button class="glass" id="btn-vigil" aria-label="Begin a vigil"><svg class="i" viewBox="0 0 24 24"><path d="M9 11h6v9H9z"/><path d="M12 11V9"/><path d="M12 2.8c1.6 1.7 2.1 3 1.3 4.2-.6.8-1.9.8-2.5 0-.8-1.1-.3-2.6 1.2-4.2z"/><path d="M7 20h10"/></svg></button>
             <button class="glass" id="btn-seal" aria-label="Seal this scroll"></button>
@@ -451,15 +553,15 @@ button.srow:first-child { border-top: 0; }
         </div>
         <div class="small-caps editor-meta" id="editor-meta"></div>
         <div class="page" id="editor-page">
-          <textarea class="title-input" id="title" rows="1" placeholder="Title" aria-label="Title"></textarea>
+          <textarea class="title-input" id="title" rows="1" placeholder="A title, if thou wilt" aria-label="Title"></textarea>
           <div class="fleuron-rule" aria-hidden="true"><span>&#10086;</span></div>
-          <div class="manuscript" id="body" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Scroll text" spellcheck="true"></div>
+          <div class="manuscript" id="body" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Entry text" spellcheck="true"></div>
         </div>
         <div class="dock">
           <span class="count" id="count"></span>
           <button class="tool" id="btn-check" aria-label="Checklist"><svg class="i" viewBox="0 0 24 24"><rect x="3.5" y="4" width="5.5" height="5.5" rx="1"/><path d="M4.8 17.2l1.5 1.5 2.8-3.2"/><path d="M12.5 6.8h8M12.5 17.5h8"/></svg></button>
           <button class="tool fl" id="btn-flourish" aria-label="Insert flourish divider">&#10086;</button>
-          <button class="tool" id="btn-tome" aria-label="Move to tome" aria-haspopup="menu"><svg class="i" viewBox="0 0 24 24"><path d="M5 4.5h10.5a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10.5"/><path d="M9 4.5v5l1.7-1.2 1.7 1.2v-5"/></svg></button>
+<button class="tool" id="btn-humour" aria-label="Mark the day's humour" aria-haspopup="menu"></button>
           <span class="sep" id="kb-sep" hidden></span>
           <button class="tool" id="btn-kb" aria-label="Hide keyboard" hidden><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="11" rx="2"/><path d="M7 8h.01M11 8h.01M15 8h.01M8 11.5h8M9 19l3 2 3-2"/></svg></button>
         </div>
@@ -467,7 +569,7 @@ button.srow:first-child { border-top: 0; }
 
       <!-- Sealed -->
       <section class="view paper offright" id="v-sealed" aria-label="Sealed scroll" hidden>
-        <div class="topbar"><button class="glass back" data-back><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Scrolls</button></div>
+        <div class="topbar"><button class="glass back" data-back><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Chronicle</button></div>
         <div class="sealed-body">
           <div class="letter-wrap" role="img" aria-label="A folded letter, closed with a wax seal and ribbon">
             <div class="letter"><div class="flap-shadow"><div class="flap"></div></div></div>
@@ -475,9 +577,9 @@ button.srow:first-child { border-top: 0; }
             <div id="sealed-seal"></div>
           </div>
           <div class="sealed-copy">
-            <span class="small-caps">Sealed scroll</span>
+            <span class="small-caps">Sealed page</span>
             <h2 id="sealed-title"></h2>
-            <p>This scroll bears thy seal. Only thy face may break it.</p>
+            <p>This page bears thy seal. Only thy face may break it.</p>
           </div>
           <div class="sealed-foot">
             <button class="btn-rubric" id="btn-break"><svg class="i" viewBox="0 0 24 24"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3"/><path d="M9 9v1.5M15 9v1.5M12 9v4h-1M9.5 16c1.5 1 3.5 1 5 0"/></svg>BREAK THE SEAL</button>
@@ -491,12 +593,15 @@ button.srow:first-child { border-top: 0; }
         <div class="sheet-head"><h1>The Chamber</h1><button class="text-btn" data-close-chamber>Done</button></div>
         <div class="settings">
           <section>
+            <button class="patron-banner" id="patron-banner"></button>
+          </section>
+          <section>
             <span class="label">Parchment</span>
             <div class="card pad"><div class="swatches" id="parchments"></div></div>
           </section>
           <section>
             <span class="label">Sealing wax &amp; rubric</span>
-            <div class="card pad"><div class="inks" id="inks"></div></div>
+            <div class="card pad"><div class="inks" id="inks"></div><div class="waxes" id="patron-waxes" style="margin-top:12px;padding-top:14px;border-top:1px solid var(--rule)"></div></div>
           </section>
           <section>
             <span class="label">The hand</span>
@@ -504,6 +609,14 @@ button.srow:first-child { border-top: 0; }
               <div class="srow"><span>Script</span><div class="segmented" id="hand"><button data-hand="book">Book hand</button><button data-hand="plain">Plain</button></div></div>
               <div class="srow"><span>Illuminated initials<span class="sub">A gilded first letter on every scroll</span></span><button class="switch" role="switch" data-setting="illuminated" aria-label="Illuminated initials"><span></span></button></div>
               <div class="srow"><span>Hours of the day<span class="sub" id="hours-sub"></span></span><button class="switch" role="switch" data-setting="hours" aria-label="Hours of the day"><span></span></button></div>
+            </div>
+          </section>
+          <section>
+            <span class="label">The diary</span>
+            <div class="card">
+              <div class="srow"><span>Seal the diary on opening<span class="sub">Face ID each time it opens</span></span><button class="switch" role="switch" data-setting="lock" aria-label="Seal the diary on opening"><span></span></button></div>
+              <div class="srow"><span>The evening bell<span class="sub">A gentle reminder at Compline, 9 pm</span></span><button class="switch" role="switch" data-setting="bell" aria-label="The evening bell"><span></span></button></div>
+              <div class="srow"><span>A question each day<span class="sub">Shown when today's page is blank</span></span><button class="switch" role="switch" data-setting="prompts" aria-label="A question each day"><span></span></button></div>
             </div>
           </section>
           <section>
@@ -526,7 +639,7 @@ button.srow:first-child { border-top: 0; }
             <span class="label">About</span>
             <div class="card">
               <button class="srow" id="btn-rewelcome"><span class="lead"><span class="ico" style="background:#7A5A1E"><svg class="i" viewBox="0 0 24 24"><path d="M5 4.5h10.5a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10.5"/></svg></span>Show the welcome again</span><span class="val"><svg class="i" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></button>
-              <button class="srow" id="btn-reset"><span class="lead"><span class="ico" style="background:#4B5A6E"><svg class="i" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/></svg></span>Restore the example scrolls</span><span class="val"><svg class="i" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></button>
+              <button class="srow" id="btn-reset"><span class="lead"><span class="ico" style="background:#4B5A6E"><svg class="i" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/></svg></span>Restore the example pages</span><span class="val"><svg class="i" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></button>
             </div>
             <p class="note">Prototype. Set in Cinzel, EB Garamond and UnifrakturMaguntia.</p>
           </section>
@@ -563,23 +676,42 @@ button.srow:first-child { border-top: 0; }
         <div class="vigil-foot" id="vigil-foot"></div>
       </div>
 
+      <!-- Patronage -->
+      <section class="view paper offdown" id="v-patron" aria-label="The Patronage" hidden>
+        <div class="sheet-head"><span class="label">The Patronage</span><button class="text-btn" id="btn-close-patron">Done</button></div>
+        <div class="settings" id="patron-body"></div>
+      </section>
+
+      <!-- Diary lock -->
+      <div class="lockscreen paper" id="lockscreen" hidden>
+        <div class="lock-body">
+          <span class="small-caps">Scriptorium</span>
+          <div id="lock-seal"></div>
+          <h2>Thy diary is sealed</h2>
+          <p>Only thy face may open it.</p>
+        </div>
+        <div class="sealed-foot">
+          <button class="btn-rubric" id="btn-unlock"><svg class="i" viewBox="0 0 24 24"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3"/><path d="M9 9v1.5M15 9v1.5M12 9v4h-1M9.5 16c1.5 1 3.5 1 5 0"/></svg>BREAK THE SEAL</button>
+        </div>
+      </div>
+
       <!-- Welcome -->
       <div class="welcome paper" id="welcome" hidden>
         <div class="frame1"></div><div class="frame2"></div>
         <div class="welcome-body">
           <div class="initial big rise" aria-hidden="true"><b>S</b></div>
           <h1 class="rise" style="animation-delay:.12s">SCRIPTORIUM</h1>
-          <p class="tag rise" style="animation-delay:.2s">A quiet chamber for thy thoughts.</p>
+          <p class="tag rise" style="animation-delay:.2s">A private diary, sealed in wax.</p>
           <div class="fleuron-rule rise" style="width:100%;animation-delay:.28s" aria-hidden="true"><span>&#10086;</span></div>
           <div class="points">
-            <div class="point rise" style="animation-delay:.36s"><span class="pi"><svg class="i" viewBox="0 0 24 24"><path d="M20 3C13 4 8 9 6 16l-2 5"/><path d="M20 3c-1 7-5 11-12 12"/><path d="M9 14c3-3 6-6 9-8"/></svg></span><div><b>One page. No clutter.</b><span>Open and write. Every scroll keeps itself.</span></div></div>
-            <div class="point rise" style="animation-delay:.44s"><span class="pi"><img id="welcome-seal" alt=""></span><div><b>Seal what is private.</b><span>Press wax on any scroll. Face ID breaks it.</span></div></div>
-            <div class="point rise" style="animation-delay:.52s"><span class="pi"><svg class="i" viewBox="0 0 24 24"><path d="M9 11h6v9H9z"/><path d="M12 11V9"/><path d="M12 2.8c1.6 1.7 2.1 3 1.3 4.2-.6.8-1.9.8-2.5 0-.8-1.1-.3-2.6 1.2-4.2z"/><path d="M7 20h10"/></svg></span><div><b>Write by candlelight.</b><span>A vigil hides all but thy words.</span></div></div>
+            <div class="point rise" style="animation-delay:.36s"><span class="pi"><svg class="i" viewBox="0 0 24 24"><path d="M20 3C13 4 8 9 6 16l-2 5"/><path d="M20 3c-1 7-5 11-12 12"/><path d="M9 14c3-3 6-6 9-8"/></svg></span><div><b>A page for every day.</b><span>With a question, when the page is blank.</span></div></div>
+            <div class="point rise" style="animation-delay:.44s"><span class="pi"><img id="welcome-seal" alt=""></span><div><b>Seal what is private.</b><span>Press wax on any page, or the whole diary.</span></div></div>
+            <div class="point rise" style="animation-delay:.52s"><span class="pi"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17"/></svg></span><div><b>Keep thy humours.</b><span>Was the day sanguine, choleric, melancholic or phlegmatic?</span></div></div>
           </div>
         </div>
         <div class="welcome-foot rise" style="animation-delay:.62s">
           <button class="btn-rubric" id="btn-begin">TAKE UP THE QUILL</button>
-          <p>No account. Thy scrolls stay on this device.</p>
+          <p>No account. Thy pages stay on this device.</p>
         </div>
       </div>
 
@@ -597,7 +729,7 @@ button.srow:first-child { border-top: 0; }
   // raised emblem, fine texture, bubbles) and lights it per pixel.
   // ===================================================================
   const SealArt = (() => {
-    const WAX = { vermilion: [150, 24, 15], lapis: [26, 50, 112], verdigris: [22, 92, 70], tyrian: [86, 30, 98] };
+    const WAX = { vermilion: [150, 24, 15], lapis: [26, 50, 112], verdigris: [22, 92, 70], tyrian: [86, 30, 98], gold: [184, 138, 44], jet: [40, 34, 38], ivory: [224, 210, 178], rose: [172, 66, 92], forest: [30, 74, 46] };
     const cache = new Map();
     function hashStr(s) { let h = 2166136261 >>> 0; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h; }
     function mulberry(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
@@ -666,6 +798,50 @@ button.srow:first-child { border-top: 0; }
       g.beginPath(); g.moveTo(0, 0.17 * L); g.lineTo(0, 0.5 * L); g.stroke();
       g.restore();
     }
+    function drawEmblem(g, S, name) {
+      g.save();
+      const dot = (x, y, r) => { g.beginPath(); g.arc(x * S, y * S, r * S, 0, Math.PI * 2); g.fill(); };
+      if (name === "star") {
+        g.beginPath();
+        for (let i = 0; i < 16; i++) { const r = i % 2 ? S * 0.2 : S * 0.52, a = -Math.PI / 2 + i * Math.PI / 8; g.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
+        g.closePath(); g.fill();
+      } else if (name === "moon") {
+        dot(0, 0, 0.46);
+        g.globalCompositeOperation = "destination-out";
+        dot(0.2, -0.1, 0.4);
+        g.globalCompositeOperation = "source-over";
+        dot(0.3, 0.3, 0.06);
+        dot(0.42, 0.06, 0.04);
+      } else if (name === "crown") {
+        const pts = [[-0.46, 0.22], [-0.46, -0.18], [-0.24, 0.02], [0, -0.32], [0.24, 0.02], [0.46, -0.18], [0.46, 0.22]];
+        g.beginPath();
+        pts.forEach(([x, y], i) => i ? g.lineTo(x * S, y * S) : g.moveTo(x * S, y * S));
+        g.closePath(); g.fill();
+        g.fillRect(-0.46 * S, 0.28 * S, 0.92 * S, 0.12 * S);
+        dot(-0.46, -0.25, 0.065); dot(0, -0.39, 0.065); dot(0.46, -0.25, 0.065);
+        g.globalCompositeOperation = "destination-out";
+        dot(-0.22, 0.13, 0.045); dot(0, 0.11, 0.05); dot(0.22, 0.13, 0.045);
+        g.globalCompositeOperation = "source-over";
+      } else if (name === "rose") {
+        for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / 5; dot(Math.cos(a) * 0.24, Math.sin(a) * 0.24, 0.21); }
+        g.globalCompositeOperation = "destination-out";
+        dot(0, 0, 0.2);
+        g.globalCompositeOperation = "source-over";
+        for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + (i + 0.5) * 2 * Math.PI / 5; dot(Math.cos(a) * 0.1, Math.sin(a) * 0.1, 0.09); }
+        g.globalCompositeOperation = "destination-out";
+        dot(0, 0, 0.065);
+        g.globalCompositeOperation = "source-over";
+        dot(0, 0, 0.035);
+      } else if (name === "key") {
+        g.rotate(-Math.PI / 4);
+        g.lineWidth = S * 0.09;
+        g.beginPath(); g.arc(-S * 0.3, 0, S * 0.17, 0, Math.PI * 2); g.stroke();
+        g.fillRect(-S * 0.14, -S * 0.045, S * 0.66, S * 0.09);
+        g.fillRect(S * 0.3, 0, S * 0.08, S * 0.18);
+        g.fillRect(S * 0.42, 0, S * 0.08, S * 0.13);
+      }
+      g.restore();
+    }
     function emblemMask(N, cx, cy, S, emblem) {
       const c = document.createElement("canvas");
       c.width = c.height = N;
@@ -680,6 +856,7 @@ button.srow:first-child { border-top: 0; }
         g.beginPath(); g.arc(Math.cos(a) * S * 0.785, Math.sin(a) * S * 0.785, S * 0.03, 0, Math.PI * 2); g.fill();
       }
       if (emblem === "quill") drawQuill(g, S);
+      else if (emblem.length > 1) drawEmblem(g, S, emblem);
       else {
         g.font = Math.round(S * 1.16) + "px UnifrakturMaguntia, 'Old English Text MT', serif";
         g.textAlign = "center";
@@ -780,7 +957,7 @@ button.srow:first-child { border-top: 0; }
   // ---------- Constants ----------
   const BOX = "☐", CHECKED = "☑", FLEURON = "❦";
   const DAY = 86400000;
-  const STORE_KEY = "scriptorium-prototype-v1";
+  const STORE_KEY = "scriptorium-diary-v1";
   const ICON_LOCK_OPEN = '<svg class="i" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/></svg>';
   const ICON_LOCK = '<svg class="i" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
   const ICON_CHECK = '<svg class="i" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg>';
@@ -797,7 +974,54 @@ button.srow:first-child { border-top: 0; }
     { id: "candlelight", name: "Candlelight" },
     { id: "bysun", name: "By the sun" },
   ];
-  const DEFAULT_TOMES = ["Musings", "Quests", "Ledger"];
+  const ICON_SUN = '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5V5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>';
+  const ICON_MOON = '<svg class="i" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 1 1 9.5 4.5a6.5 6.5 0 0 0 10 10z"/></svg>';
+  const ICON_WAVES = '<svg class="i" viewBox="0 0 24 24"><path d="M3 9c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg>';
+  const ICON_HUMOURS = '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17"/></svg>';
+  const ICON_CHEV_L = '<svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
+  const ICON_CHEV_R = '<svg class="i" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
+  const ICON_CANDLE = '<svg class="i" viewBox="0 0 24 24"><path d="M9 11h6v9H9z"/><path d="M12 11V9"/><path d="M12 2.8c1.6 1.7 2.1 3 1.3 4.2-.6.8-1.9.8-2.5 0-.8-1.1-.3-2.6 1.2-4.2z"/><path d="M7 20h10"/></svg>';
+  const ICON_BELL = '<svg class="i" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>';
+  const HUMOURS = [
+    { id: "sanguine", name: "Sanguine", gloss: "cheerful, hopeful", icon: ICON_SUN },
+    { id: "choleric", name: "Choleric", gloss: "fiery, vexed", icon: ICON_FLAME },
+    { id: "melancholic", name: "Melancholic", gloss: "low, wistful", icon: ICON_MOON },
+    { id: "phlegmatic", name: "Phlegmatic", gloss: "calm, at rest", icon: ICON_WAVES },
+  ];
+  const PROMPTS = [
+    "What did the day ask of thee, and what didst thou give?",
+    "Name one small mercy thou didst notice today.",
+    "What weighs upon thee tonight? Set it down here.",
+    "Who crossed thy path today, and what did they leave behind?",
+    "What wouldst thou tell thyself a year from now?",
+    "What did thy hands make or mend today?",
+    "Where did the hours go? Follow them back.",
+    "What art thou waiting for?",
+    "Describe the light at this hour.",
+    "What didst thou learn that thou didst not know at Matins?",
+    "Which worry turned out smaller than it seemed?",
+    "What would make tomorrow a good day?",
+    "Write a letter thou wilt never send.",
+    "What gave thee courage today?",
+    "What art thou grateful for that cost nothing?",
+    "What didst thou say yes to, and what no?",
+    "What would thy younger self think of this day?",
+  ];
+  const WAXES = [
+    { id: "gold", name: "Gold" },
+    { id: "jet", name: "Jet" },
+    { id: "ivory", name: "Ivory" },
+    { id: "rose", name: "Rose" },
+    { id: "forest", name: "Forest" },
+  ];
+  const PACKS = [
+    { id: "royal", name: "The Royal House", note: "A crown and a star, for letters of state.", emblems: ["crown", "star"], wax: "gold", price: "$1.99" },
+    { id: "garden", name: "The Walled Garden", note: "A five-petalled rose.", emblems: ["rose"], wax: "rose", price: "$0.99" },
+    { id: "wayfarer", name: "The Wayfarer", note: "A key for secrets, a moon for night roads.", emblems: ["key", "moon"], wax: "forest", price: "$1.99" },
+    { id: "hallows", name: "All Hallows' Wax", note: "Jet-black wax and a crescent moon. Gone after All Souls' Day.", emblems: ["moon"], wax: "jet", price: "$0.99", seasonal: true, unlocksWax: true },
+  ];
+  const EMBLEM_NAMES = { monogram: "Thine initial", quill: "Quill", crown: "Crown", star: "Star", rose: "Rose", key: "Key", moon: "Moon" };
+  const hallowsOpen = (() => { const n = new Date(); return n.getMonth() === 9 || (n.getMonth() === 10 && n.getDate() <= 2); })();
   const DPR = Math.min(3, Math.max(2, window.devicePixelRatio || 2));
 
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -818,45 +1042,43 @@ button.srow:first-child { border-top: 0; }
   }
   function exampleScrolls() {
     let n = 0;
-    const make = (text, tome, daysAgo, hour, extra) => Object.assign({ id: "s" + (++n) + "-" + Date.now().toString(36), text, tome, created: at(daysAgo, hour), updated: at(daysAgo, hour, 20), sealed: false, burned: null }, extra || {});
+    const make = (text, daysAgo, hour, humour, extra) => Object.assign({ id: "s" + (++n) + "-" + Date.now().toString(36), text, tome: "", humour, created: at(daysAgo, hour), updated: at(daysAgo, hour, 20), sealed: false, burned: null }, extra || {});
     return [
-      make(["Welcome to thy Scriptorium",
-        "This is a scroll. Its first line is the title; everything beneath is thine to write. There are no folders to tend and nothing to save. Write, and it is kept.",
-        BOX + " Tap a box to tick it off",
-        BOX + " Press the wax seal for a new scroll",
-        BOX + " Swipe a scroll left to burn it, right to seal it",
-        FLEURON,
-        "Light the candle at the top of any scroll to begin a vigil: a quiet stretch of writing with nothing else on the page."].join("\n"), "Musings", 0, 20),
-      make(["On the Road to Eastmarch",
-        "Pack the waxed cloak, two loaves of rye, and the map Aldric drew on the back of the tavern bill. The pass closes at first snow, so we leave before the new moon.",
-        CHECKED + " Letter for the abbess",
-        BOX + " Whetstone and oil",
-        BOX + " Return the borrowed lute",
-        "If the bridge at Hollin is out, take the ferry and pay no more than two silver."].join("\n"), "Quests", 0, 19),
-      make(["Market Ledger",
-        BOX + " Honey",
-        BOX + " Rye flour",
-        CHECKED + " Three onions",
-        BOX + " Beeswax candles, not tallow",
-        BOX + " A fresh pot of ink"].join("\n"), "Ledger", 0, 10),
+      make(["First frost",
+        "The whole yard was white at Prime. I stood at the door with my tea until it went cold, and did not mind at all.",
+        CHECKED + " Bring in the last of the apples",
+        BOX + " Mend the gate before the wind does"].join("\n"), 1, 7, "sanguine"),
       make(["Letters Unsent",
-        "To my brother, who left for the coast in spring: the orchard has gone wild without you, and so, I think, have I."].join("\n"), "", 1, 22, { sealed: true }),
-      make(["A Thought at Matins",
+        "To my brother, who left for the coast in spring: the orchard has gone wild without you, and so, I think, have I."].join("\n"), 1, 22, "melancholic", { sealed: true }),
+      make(["A quiet Sunday",
+        "Read by the fire most of the afternoon. The book is long and I am in no hurry to finish it. Supper was bread, cheese and the last good pear."].join("\n"), 3, 20, "phlegmatic"),
+      make(["On being kept waiting",
+        "Three hours at the guild hall for a signature that took a moment. I wrote half of this entry in my head on the walk home, and it was angrier than this. Setting it down took the heat out of it."].join("\n"), 4, 18, "choleric"),
+      make(["A thought at Matins",
         "The hour before dawn is the only one that belongs wholly to me. No bells, no errands, no one at the door asking after the price of wool.",
-        "I have begun to think the quiet is not empty at all. It is full, the way a well is full: you only notice when you lower the bucket."].join("\n"), "Musings", 2, 1),
-      make(["Ideas for the Tavern Sign",
-        "A sleeping dragon curled round a tankard. Or a lantern with a fox inside it, looking out.",
-        "Ask the smith what iron would cost for the bracket."].join("\n"), "Musings", 4, 13),
+        "I have begun to think the quiet is not empty at all. It is full, the way a well is full: you only notice when you lower the bucket."].join("\n"), 6, 1, "melancholic"),
+      make(["Market day",
+        "Sold every jar of honey by Sext. Bought ink, a new nib, and far too many pears.",
+        FLEURON,
+        "Tomorrow: begin the letter to the abbess."].join("\n"), 8, 17, "sanguine"),
+      make(["The long way home",
+        "Took the river path instead of the road. Two herons, standing as if they were waiting for someone. I was in no hurry either."].join("\n"), 11, 19, "phlegmatic"),
+      make(["How this diary works",
+        "Each page is an entry, and its first line is its title. Write a little or a lot; it keeps itself.",
+        BOX + " Mark the day's humour with the quartered circle below",
+        BOX + " Seal a page with wax when it is for thine eyes only",
+        BOX + " Light the candle above to begin a vigil",
+        "Swipe a page left to burn it, right to seal it."].join("\n"), 13, 20, "sanguine"),
     ];
   }
-  const DEFAULT_SETTINGS = { parchment: "vellum", ink: "vermilion", hand: "book", illuminated: true, hours: true, sounds: false, haptics: true, vigil: 25 };
+  const DEFAULT_SETTINGS = { parchment: "vellum", ink: "vermilion", hand: "book", illuminated: true, hours: true, sounds: false, haptics: true, vigil: 25, lock: false, bell: false, prompts: true, patron: false, monogram: "S", emblem: "monogram", wax: null, signets: [], notify: [], tips: 0 };
   let state = load();
   if (!state || !Array.isArray(state.scrolls)) {
     state = { scrolls: exampleScrolls(), settings: Object.assign({}, DEFAULT_SETTINGS), seenWelcome: false };
   }
   state.settings = Object.assign({}, DEFAULT_SETTINGS, state.settings || {});
   state.scrolls = state.scrolls.filter(s => !s.burned || Date.now() - s.burned < 30 * DAY);
-  const ui = { tome: null, query: "", current: null, openSeals: new Set(), view: "home" };
+  const ui = { query: "", current: null, openSeals: new Set(), view: "home", monthOffset: 0, preview: null, patronFrom: "home" };
 
   // ---------- Text helpers ----------
   const lines = s => s.text.split("\n");
@@ -865,7 +1087,7 @@ button.srow:first-child { border-top: 0; }
     if (line.startsWith(BOX) || line.startsWith(CHECKED)) line = line.slice(1).trim();
     return line;
   }
-  const titleOf = s => plain(lines(s)[0] || "") || "Untitled scroll";
+  const titleOf = s => plain(lines(s)[0] || "") || new Date(s.created).toLocaleDateString("en-GB", { weekday: "long" }) + "'s page";
   const isCheck = line => line.startsWith(BOX) || line.startsWith(CHECKED);
   const preview = s => lines(s).slice(1).map(plain).filter(l => l && l !== FLEURON).join(" \u00b7 ");
   function initialOf(s) {
@@ -893,7 +1115,17 @@ button.srow:first-child { border-top: 0; }
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const live = () => state.scrolls.filter(s => !s.burned).sort((a, b) => b.updated - a.updated);
   const byId = id => state.scrolls.find(s => s.id === id);
-  const seal = (size, opts) => SealArt.render(Object.assign({ px: Math.round(size * DPR), ink: state.settings.ink }, opts || {}));
+  const isInk = w => INKS.some(i => i.id === w);
+  const ownedPacks = () => PACKS.filter(p => state.settings.signets.includes(p.id));
+  const ownsEmblem = e => e === "monogram" || e === "quill" ? state.settings.patron : ownedPacks().some(p => p.emblems.includes(e));
+  const ownsWax = w => !w || isInk(w) || state.settings.patron || ownedPacks().some(p => p.unlocksWax && p.wax === w);
+  const sealWax = () => state.settings.wax && ownsWax(state.settings.wax) ? state.settings.wax : state.settings.ink;
+  function sealEmblem() {
+    const e = state.settings.emblem;
+    if (!e || !ownsEmblem(e)) return "S";
+    return e === "monogram" ? (state.settings.monogram || "S") : e;
+  }
+  const seal = (size, opts) => SealArt.render(Object.assign({ px: Math.round(size * DPR), ink: sealWax(), emblem: sealEmblem() }, opts || {}));
   const initialHTML = letter => '<span class="initial" aria-hidden="true"><b>' + esc(letter) + "</b></span>";
 
   // ---------- Settings ----------
@@ -907,8 +1139,8 @@ button.srow:first-child { border-top: 0; }
   }
   function paintSeals() {
     $("#fab-seal").src = seal(84, { emblem: "quill", seed: "fab" });
-    $("#brand-seal").src = seal(34, { emblem: "S", seed: "brand" });
-    $("#welcome-seal").src = seal(40, { emblem: "S", seed: "welcome" });
+    $("#brand-seal").src = seal(34, { seed: "brand" });
+    $("#welcome-seal").src = seal(40, { seed: "welcome" });
     if (ui.current) setSealIcon();
   }
 
@@ -972,53 +1204,100 @@ button.srow:first-child { border-top: 0; }
     ui.view = to;
   }
 
-  // ---------- Home ----------
+  // ---------- Home: the Chronicle ----------
+  const chronicle = () => state.scrolls.filter(s => !s.burned).sort((a, b) => b.created - a.created);
+  const humourOf = id => HUMOURS.find(h => h.id === id);
+  function promptFor(ts) {
+    const d = new Date(ts);
+    const dayOfYear = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / DAY);
+    return PROMPTS[dayOfYear % PROMPTS.length];
+  }
   function renderHome() {
-    const all = live();
-    const tomes = [...new Set(all.map(s => s.tome).filter(Boolean))].sort();
-    if (ui.tome && !tomes.includes(ui.tome)) ui.tome = null;
-    const now = new Date();
-    $("#home-date").textContent = now.toLocaleDateString("en-GB", { weekday: "long" }) + " · the " + ordinal(now.getDate()) + " of " + now.toLocaleDateString("en-GB", { month: "long" });
-    const latest = all[0];
-    $("#home-sub").textContent = latest
-      ? cap(numWord(all.length)) + (all.length === 1 ? " scroll" : " scrolls") + ", last inked " + (sameDay(latest.updated, Date.now()) ? "at " + timeOf(latest.updated) : "on " + dayOf(latest.updated))
-      : "An empty codex awaits thy quill.";
-    const tabs = $("#tabs");
-    tabs.hidden = tomes.length === 0;
-    tabs.innerHTML = ['<button class="tab" data-tome="" aria-pressed="' + (ui.tome === null) + '">All</button>']
-      .concat(tomes.map(t => '<button class="tab" data-tome="' + esc(t) + '" aria-pressed="' + (ui.tome === t) + '">' + esc(t) + "</button>")).join("");
-
+    const all = chronicle();
     const q = ui.query.trim().toLowerCase();
-    const shown = all.filter(s => (!ui.tome || s.tome === ui.tome) && (!q || (s.sealed ? titleOf(s) : s.text + " " + s.tome).toLowerCase().includes(q)));
-    const list = $("#list");
-    if (all.length === 0) {
-      list.innerHTML = '<div class="empty"><span class="initial big"><b>S</b></span><h2>Thy codex is empty</h2><p>Press the wax seal below to begin thy first scroll.</p></div>';
-      return;
+    let html = q ? "" : chronicleHead(all) + todayCard(all) + calendarHTML(all);
+    const shown = q ? all.filter(s => (s.sealed ? titleOf(s) : titleOf(s) + " " + s.text).toLowerCase().includes(q)) : all;
+    if (q && !shown.length) html += '<div class="empty"><p>No page bears those words.</p></div>';
+    let month = "";
+    shown.forEach(s => {
+      const m = new Date(s.created).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+      if (m !== month) { month = m; html += '<div class="month-rule"><span class="small-caps">' + esc(m) + "</span></div>"; }
+      html += rowHTML(s);
+    });
+    $("#list").innerHTML = html;
+  }
+  function chronicleHead(all) {
+    const now = new Date();
+    const latest = all.slice().sort((a, b) => b.updated - a.updated)[0];
+    let sub = "A fresh diary, waiting for its first page.";
+    if (latest) {
+      const d = dayOf(latest.updated);
+      const when = d === "Today" ? "at " + timeOf(latest.updated) : d === "Yesterday" ? "yesterday" : "on " + d;
+      sub = cap(numWord(Math.min(all.length, 99))) + (all.length === 1 ? " page" : " pages") + " kept, last written " + when;
     }
-    if (shown.length === 0) {
-      list.innerHTML = '<div class="empty"><p>No scroll bears those words.</p></div>';
-      return;
+    return '<div class="chron-head"><span class="small-caps">' + esc(now.toLocaleDateString("en-GB", { weekday: "long" }) + " · the " + ordinal(now.getDate()) + " of " + now.toLocaleDateString("en-GB", { month: "long" })) +
+      '</span><h1>Thy Chronicle</h1><p class="subtitle">' + esc(sub) + "</p></div>";
+  }
+  function todayCard(all) {
+    const today = all.filter(s => sameDay(s.created, Date.now()));
+    if (today.length) {
+      const s = today[0];
+      return '<div class="today-card"><span class="label">Today\'s page</span><span class="tc-title">' + esc(titleOf(s)) + '</span><span class="tc-preview">' + esc(s.sealed ? "Sealed with thy seal." : (preview(s) || "No further words yet.")) +
+        '</span><button class="btn-rubric small" data-open-id="' + s.id + '">' + (s.sealed ? "OPEN TODAY'S PAGE" : "CONTINUE WRITING") + "</button></div>";
     }
-    list.innerHTML = shown.map(s => {
-      const mark = s.sealed ? '<img class="seal-img" width="48" height="48" src="' + seal(48, { seed: s.id }) + '" alt="">' : initialHTML(initialOf(s));
-      const pv = s.sealed ? '<span class="row-preview italic">Sealed. Only thy face may break it.</span>'
-        : (preview(s) ? '<span class="row-preview">' + esc(preview(s)) + "</span>" : '<span class="row-preview italic">No further words.</span>');
-      const meta = '<span class="row-meta small-caps"><span>' + esc(dayOf(s.updated)) + '</span><span class="dot"></span><span>' + esc(timeOf(s.updated)) + "</span>" + (s.tome ? '<span class="dot"></span><span class="tome">' + esc(s.tome) + "</span>" : "") + "</span>";
-      return '<div class="row" data-id="' + s.id + '">' +
-        '<div class="row-actions"><button class="act-seal" tabindex="-1" data-act="seal">' + (s.sealed ? ICON_LOCK_OPEN : '<img src="' + seal(30, { seed: "swipe" }) + '" alt="">') + (s.sealed ? "UNSEAL" : "SEAL") + '</button><button class="act-burn" tabindex="-1" data-act="burn">' + ICON_FLAME + "BURN</button></div>" +
-        '<button class="row-main" data-open>' + mark + '<span class="row-text"><span class="row-title">' + esc(titleOf(s)) + "</span>" + pv + meta + "</span></button></div>";
-    }).join("");
+    const question = state.settings.prompts
+      ? '<p class="tc-prompt">“' + esc(promptFor(Date.now())) + '”</p><span class="small-caps">A question for ' + hourName(Date.now()) + "</span>"
+      : '<p class="tc-prompt">Nothing yet written today.</p>';
+    return '<div class="today-card"><span class="label">Today\'s page is blank</span>' + question + '<button class="btn-rubric small" data-new-today>BEGIN TODAY\'S ENTRY</button></div>';
+  }
+  function calendarHTML(all) {
+    const now = new Date();
+    const view = new Date(now.getFullYear(), now.getMonth() + ui.monthOffset, 1);
+    const y = view.getFullYear(), m = view.getMonth();
+    const days = new Date(y, m + 1, 0).getDate(), lead = (view.getDay() + 6) % 7;
+    const byDay = {};
+    all.forEach(s => {
+      const d = new Date(s.created);
+      if (d.getFullYear() === y && d.getMonth() === m) (byDay[d.getDate()] = byDay[d.getDate()] || []).push(s);
+    });
+    const kept = Object.keys(byDay).length;
+    const tally = {};
+    Object.values(byDay).forEach(list => list.forEach(s => { if (s.humour) tally[s.humour] = (tally[s.humour] || 0) + 1; }));
+    const top = Object.entries(tally).sort((a, b) => b[1] - a[1])[0];
+    const summary = kept ? cap(numWord(kept)) + (kept === 1 ? " day kept" : " days kept") + (top ? " · mostly " + humourOf(top[0]).name.toLowerCase() : "") : "No days kept yet";
+    let cells = ["M", "T", "W", "T", "F", "S", "S"].map(d => '<span class="cal-dow" aria-hidden="true">' + d + "</span>").join("");
+    for (let i = 0; i < lead; i++) cells += "<span></span>";
+    for (let d = 1; d <= days; d++) {
+      const date = new Date(y, m, d), entries = byDay[d];
+      const isToday = sameDay(date, now), future = date > now && !isToday;
+      const sealed = entries && entries.some(s => s.sealed);
+      const label = date.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) + (entries ? ", written" : "") + (sealed ? ", sealed" : "");
+      cells += '<button class="cal-day' + (entries ? " kept" : "") + (isToday ? " today" : "") + '" data-day="' + date.getTime() + '"' + (future ? " disabled" : "") + ' aria-label="' + esc(label) + '">' + d +
+        (sealed ? '<img class="seal-img" src="' + seal(17, { seed: "cal" }) + '" alt="">' : "") + "</button>";
+    }
+    return '<div class="cal"><div class="cal-head"><button class="cal-nav" data-month-step="-1" aria-label="Previous month">' + ICON_CHEV_L + '</button><div><span class="cal-month">' +
+      esc(view.toLocaleDateString("en-GB", { month: "long", year: "numeric" })) + '</span><span class="small-caps">' + esc(summary) + '</span></div><button class="cal-nav" data-month-step="1" aria-label="Next month"' +
+      (ui.monthOffset >= 0 ? " disabled" : "") + ">" + ICON_CHEV_R + '</button></div><div class="cal-grid">' + cells + "</div></div>";
+  }
+  function rowHTML(s) {
+    const d = new Date(s.created), h = humourOf(s.humour);
+    const pv = s.sealed ? '<span class="row-preview italic">Sealed. Only thy face may break it.</span>'
+      : (preview(s) ? '<span class="row-preview">' + esc(preview(s)) + "</span>" : '<span class="row-preview italic">No further words.</span>');
+    const meta = '<span class="row-meta small-caps"><span>' + esc(timeOf(s.created)) + "</span>" + (h ? '<span class="dot"></span><span class="hum tome">' + ic(h.icon, 13) + esc(h.name) + "</span>" : "") + "</span>";
+    return '<div class="row" data-id="' + s.id + '"><div class="row-actions"><button class="act-seal" tabindex="-1" data-act="seal">' + (s.sealed ? ICON_LOCK_OPEN : '<img src="' + seal(30, { seed: "swipe" }) + '" alt="">') + (s.sealed ? "UNSEAL" : "SEAL") +
+      '</button><button class="act-burn" tabindex="-1" data-act="burn">' + ICON_FLAME + "BURN</button></div>" +
+      '<button class="row-main" data-open><span class="dateblock" aria-hidden="true"><span class="dow">' + esc(d.toLocaleDateString("en-GB", { weekday: "short" }).toUpperCase()) + '</span><span class="dnum">' + d.getDate() + "</span></span>" +
+      '<span class="row-text"><span class="row-title">' + esc(titleOf(s)) + "</span>" + pv + meta + "</span>" + (s.sealed ? '<img class="seal-img row-seal" src="' + seal(42, { seed: s.id }) + '" alt="">' : "") + "</button></div>";
+  }
+  function newEntry(ts) {
+    const s = { id: "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), text: "", tome: "", humour: "", created: ts, updated: Date.now(), sealed: false, burned: null };
+    state.scrolls.push(s);
+    buzz(10);
+    openScroll(s);
   }
 
-  $("#tabs").addEventListener("click", e => {
-    const b = e.target.closest(".tab");
-    if (!b) return;
-    const t = b.dataset.tome || null;
-    ui.tome = (t && ui.tome === t) ? null : t;
-    renderHome();
-  });
   $("#btn-search").addEventListener("click", () => {
-    const box = $("#search-box");
+    const box = $("#home-search");
     box.hidden = !box.hidden;
     $("#btn-search").setAttribute("aria-expanded", String(!box.hidden));
     if (!box.hidden) $("#search").focus();
@@ -1060,6 +1339,19 @@ button.srow:first-child { border-top: 0; }
     });
   }
   $("#list").addEventListener("click", e => {
+    const step = e.target.closest("[data-month-step]");
+    if (step) { ui.monthOffset = Math.min(0, ui.monthOffset + Number(step.dataset.monthStep)); renderHome(); return; }
+    const day = e.target.closest("[data-day]");
+    if (day) {
+      const ts = Number(day.dataset.day);
+      const entries = chronicle().filter(s => sameDay(s.created, ts));
+      if (entries.length) openScroll(entries[0]);
+      else newEntry(sameDay(ts, Date.now()) ? Date.now() : ts + 21 * 3600000);
+      return;
+    }
+    const openBtn = e.target.closest("[data-open-id]");
+    if (openBtn) { openScroll(byId(openBtn.dataset.openId)); return; }
+    if (e.target.closest("[data-new-today]")) { newEntry(Date.now()); return; }
     const row = e.target.closest(".row");
     if (!row) return;
     const s = byId(row.dataset.id);
@@ -1077,23 +1369,18 @@ button.srow:first-child { border-top: 0; }
   function burn(s) {
     s.burned = Date.now();
     persist(); renderHome(); buzz(14);
-    toast("Scroll burned", { icon: ICON_FLAME, undo: () => { s.burned = null; persist(); renderHome(); } });
+    toast("Page burned", { icon: ICON_FLAME, undo: () => { s.burned = null; persist(); renderHome(); } });
   }
   function toggleSealFromList(s) {
     if (s.sealed) {
       faceID(() => { s.sealed = false; persist(); renderHome(); toast("Seal broken", { icon: ICON_LOCK_OPEN }); });
     } else {
       s.sealed = true; persist(); renderHome(); buzz(20);
-      toast("Scroll sealed", { seal: s.id });
+      toast("Page sealed", { seal: s.id });
     }
   }
 
-  $("#btn-new").addEventListener("click", () => {
-    const s = { id: "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), text: "", tome: ui.tome || "", created: Date.now(), updated: Date.now(), sealed: false, burned: null };
-    state.scrolls.push(s);
-    buzz(10);
-    openScroll(s);
-  });
+  $("#btn-new").addEventListener("click", () => newEntry(Date.now()));
 
   // ---------- Simulated Face ID ----------
   function faceID(done) {
@@ -1313,14 +1600,21 @@ button.srow:first-child { border-top: 0; }
   }
   function autoGrow() { titleEl.style.height = "auto"; titleEl.style.height = titleEl.scrollHeight + "px"; }
   function renderEditorMeta() {
-    const s = ui.current;
+    const s = ui.current, h = humourOf(s.humour);
     $("#editor-meta").innerHTML = (s.sealed ? '<span class="sealed-tag"><img class="seal-img" src="' + seal(18, { seed: s.id }) + '" alt="">Sealed</span><span>·</span>' : "") +
-      "<span>" + esc(longDate(s.created)) + "</span>" + (s.tome ? "<span>·</span><span>" + esc(s.tome) + "</span>" : "");
+      "<span>" + esc(longDate(s.created)) + "</span>" + (h ? '<span>·</span><span class="hum">' + ic(h.icon, 13) + esc(h.name) + "</span>" : "");
+    setHumourIcon();
+  }
+  function setHumourIcon() {
+    const h = ui.current && humourOf(ui.current.humour);
+    $("#btn-humour").innerHTML = h ? h.icon : ICON_HUMOURS;
+    $("#btn-humour").setAttribute("aria-label", h ? "Humour: " + h.name : "Mark the day's humour");
   }
   function mountEditor(s) {
     ui.current = s;
     const ls = lines(s);
     titleEl.value = ls[0] || "";
+    bodyEl.dataset.placeholder = state.settings.prompts ? promptFor(s.created) : "Begin thy page\u2026";
     renderBody(bodyEl, ls.slice(1));
     renderEditorMeta();
     setSealIcon();
@@ -1433,30 +1727,27 @@ button.srow:first-child { border-top: 0; }
         if (!s.text.trim()) { goHome(); return; }
         s.burned = Date.now(); persist();
         goHome();
-        toast("Scroll burned", { icon: ICON_FLAME, undo: () => { s.burned = null; persist(); renderHome(); } });
+        toast("Page burned", { icon: ICON_FLAME, undo: () => { s.burned = null; persist(); renderHome(); } });
       }
     });
   });
-  $("#btn-tome").addEventListener("click", e => {
+  $("#btn-humour").addEventListener("click", e => {
     const s = ui.current;
-    const tomes = [...new Set(live().map(x => x.tome).filter(Boolean).concat(DEFAULT_TOMES))].sort();
-    const item = (name, label) => '<button data-t="' + esc(name) + '"><span style="display:flex;align-items:center;gap:12px">' + ic(ICON_BOOK, 18) + esc(label) + "</span>" + (s.tome === name ? '<span class="tick">' + ic(ICON_CHECK, 18) + "</span>" : "") + "</button>";
-    const menu = openMenu(e.currentTarget,
-      item("", "No tome") + tomes.map(t => item(t, t)).join("") + '<hr><form id="tome-form"><input id="tome-new" placeholder="Bind a new tome" aria-label="New tome name" maxlength="24"><button type="submit">BIND</button></form>', "above");
-    menu.addEventListener("click", ev => { const b = ev.target.closest("[data-t]"); if (b) setTome(b.dataset.t); });
-    $("#tome-form").addEventListener("submit", ev => {
-      ev.preventDefault();
-      const name = $("#tome-new").value.trim();
-      if (name) setTome(name);
+    const item = h => '<button data-h="' + h.id + '"><span class="hum-item">' + ic(h.icon, 22) + "<span><b>" + h.name + "</b><small>" + h.gloss + "</small></span></span>" +
+      (s.humour === h.id ? '<span class="tick">' + ic(ICON_CHECK, 18) + "</span>" : "") + "</button>";
+    const menu = openMenu(e.currentTarget, '<div class="menu-title small-caps">The day\'s humour</div>' + HUMOURS.map(item).join("") + (s.humour ? '<hr><button data-h="">Clear the humour</button>' : ""), "above");
+    menu.addEventListener("click", ev => {
+      const b = ev.target.closest("[data-h]");
+      if (!b) return;
+      s.humour = b.dataset.h;
+      s.updated = Date.now();
+      persist();
+      renderEditorMeta();
+      closeMenus();
+      const h = humourOf(s.humour);
+      toast(h ? "A " + h.name.toLowerCase() + " day" : "Humour cleared", { icon: h ? h.icon : ICON_HUMOURS });
     });
   });
-  function setTome(name) {
-    const s = ui.current;
-    s.tome = name; s.updated = Date.now(); persist();
-    renderEditorMeta();
-    closeMenus();
-    toast(name ? "Bound into " + name : "Taken from its tome", { icon: ICON_BOOK });
-  }
 
   // ---------- Sealing from the editor ----------
   $("#btn-seal").addEventListener("click", () => {
@@ -1608,7 +1899,12 @@ button.srow:first-child { border-top: 0; }
       else inner = miniPage("#F3E9D2", "#2A1F17", "#8E7B62") + '<span style="position:absolute;inset:0;clip-path:polygon(100% 0,100% 100%,0 100%)">' + miniPage("#1A130D", "#ECDDBE", "#7D6D58") + "</span>";
       return '<button class="swatch" data-p="' + p.id + '" aria-pressed="' + (s.parchment === p.id) + '"><span class="mini">' + inner + '</span><span class="name">' + p.name + "</span></button>";
     }).join("");
-    $("#inks").innerHTML = INKS.map(i => '<button class="inkwell" data-ink="' + i.id + '" aria-pressed="' + (s.ink === i.id) + '"><span class="drop"><img class="seal-img" src="' + SealArt.render({ px: Math.round(58 * DPR), ink: i.id, emblem: null, pressed: false, seed: "drop-" + i.id }) + '" alt=""></span>' + i.name + "</button>").join("");
+    const customWax = s.wax && !isInk(s.wax) && ownsWax(s.wax);
+    $("#inks").innerHTML = INKS.map(i => '<button class="inkwell" data-ink="' + i.id + '" aria-pressed="' + (s.ink === i.id && !customWax) + '"><span class="drop"><img class="seal-img" src="' + SealArt.render({ px: Math.round(58 * DPR), ink: i.id, emblem: null, pressed: false, seed: "drop-" + i.id }) + '" alt=""></span>' + i.name + "</button>").join("");
+    $("#patron-waxes").innerHTML = WAXES.map(w => '<button class="inkwell" data-pwax="' + w.id + '" aria-pressed="' + (customWax && s.wax === w.id) + '"><span class="drop"><img class="seal-img" src="' +
+      SealArt.render({ px: Math.round(46 * DPR), ink: w.id, emblem: null, pressed: false, seed: "drop-" + w.id }) + '" alt="">' + (ownsWax(w.id) ? "" : '<span class="lockmark">' + ICON_LOCK + "</span>") + "</span>" + w.name + "</button>").join("");
+    $("#patron-banner").innerHTML = '<img class="seal-img" src="' + SealArt.render({ px: Math.round(60 * DPR), ink: s.patron ? sealWax() : "gold", emblem: s.patron ? sealEmblem() : (s.monogram || "S"), seed: "banner" }) + '" alt=""><span><b>' +
+      (s.patron ? "Thou art a Patron" : "Become a Patron") + '</b><span class="sub">' + (s.patron ? "Thank thee. Change thy seal and wax here." : "Thine own seal, nine waxes, iCloud sync and widgets. One payment.") + "</span></span>" + ICON_CHEV_R;
     document.querySelectorAll("#hand button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.hand === s.hand)));
     document.querySelectorAll(".switch[data-setting]").forEach(b => b.setAttribute("aria-checked", String(!!s[b.dataset.setting])));
     $("#hours-sub").textContent = s.hours ? "Vespers, Compline, Matins…" : "Clock time";
@@ -1623,21 +1919,31 @@ button.srow:first-child { border-top: 0; }
   $("#btn-chamber").addEventListener("click", () => { renderChamber(); show("chamber"); });
   $("[data-close-chamber]").addEventListener("click", () => hide("chamber", "home", "offdown"));
   $("#parchments").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) setSetting("parchment", b.dataset.p); });
-  $("#inks").addEventListener("click", e => { const b = e.target.closest("[data-ink]"); if (b) { setSetting("ink", b.dataset.ink); buzz(10); } });
+  $("#inks").addEventListener("click", e => { const b = e.target.closest("[data-ink]"); if (b) { state.settings.wax = null; setSetting("ink", b.dataset.ink); buzz(10); } });
+  $("#patron-waxes").addEventListener("click", e => {
+    const b = e.target.closest("[data-pwax]");
+    if (!b) return;
+    if (!ownsWax(b.dataset.pwax)) { openPatron(b.dataset.pwax); return; }
+    setSetting("wax", b.dataset.pwax);
+    buzz(10);
+  });
+  $("#patron-banner").addEventListener("click", () => openPatron());
   $("#hand").addEventListener("click", e => { const b = e.target.closest("[data-hand]"); if (b) setSetting("hand", b.dataset.hand); });
   document.querySelectorAll(".switch[data-setting]").forEach(b => b.addEventListener("click", () => {
     const k = b.dataset.setting;
     setSetting(k, !state.settings[k]);
     if (k === "sounds" && state.settings.sounds) quill();
+    if (k === "lock" && state.settings.lock) toast("The diary will be sealed each time it opens", { seal: "lock-toast" });
+    if (k === "bell" && state.settings.bell) toast("The bell will ring at Compline", { icon: ICON_BELL });
   }));
   $("#vig-minus").addEventListener("click", () => setSetting("vigil", Math.max(5, state.settings.vigil - 5)));
   $("#vig-plus").addEventListener("click", () => setSetting("vigil", Math.min(90, state.settings.vigil + 5)));
   $("#btn-rewelcome").addEventListener("click", () => { hide("chamber", "home", "offdown"); setTimeout(showWelcome, 320); });
   $("#btn-reset").addEventListener("click", () => {
-    const mine = state.scrolls.filter(s => !/^s[1-6]-/.test(s.id));
+    const mine = state.scrolls.filter(s => !/^s\d+-/.test(s.id));
     state.scrolls = exampleScrolls().concat(mine);
     persist(); renderHome(); renderChamber();
-    toast("Example scrolls restored");
+    toast("Example pages restored");
   });
 
   // ---------- Ashes ----------
@@ -1684,6 +1990,156 @@ button.srow:first-child { border-top: 0; }
     toast("The Ashes are swept", { icon: ICON_FLAME });
   });
 
+  // ---------- The Patronage ----------
+  views.patron = $("#v-patron");
+  const previewEmblem = () => ui.preview.emblem === "monogram" ? (ui.preview.letter || "S") : ui.preview.emblem;
+  const visiblePacks = () => PACKS.filter(p => !p.seasonal || hallowsOpen || state.settings.signets.includes(p.id));
+  const heroSeal = () => SealArt.render({ px: Math.round(196 * DPR), ink: ui.preview.wax, emblem: previewEmblem(), seed: "patron-hero" });
+  function openPatron(wax) {
+    const s = state.settings;
+    ui.preview = { letter: s.monogram || "S", emblem: s.patron || ownsEmblem(s.emblem) ? s.emblem : "monogram", wax: wax || sealWax() };
+    renderPatron();
+    ui.patronFrom = ui.view;
+    views.patron.hidden = false;
+    $("#patron-body").scrollTop = 0;
+    requestAnimationFrame(() => requestAnimationFrame(() => views.patron.classList.remove("offdown")));
+    ui.view = "patron";
+  }
+  function closePatron() {
+    views.patron.classList.add("offdown");
+    setTimeout(() => { views.patron.hidden = true; }, 400);
+    ui.view = ui.patronFrom || "home";
+    renderChamber();
+  }
+  $("#btn-close-patron").addEventListener("click", closePatron);
+  function renderPatron() {
+    const s = state.settings, pv = ui.preview;
+    const emblemIds = ["monogram", "quill"].concat(...visiblePacks().map(pk => pk.emblems)).filter((e, i, a) => a.indexOf(e) === i);
+    const chips = emblemIds.map(e => '<button class="chip" data-emblem="' + e + '" aria-pressed="' + (pv.emblem === e) + '">' + EMBLEM_NAMES[e] + (ownsEmblem(e) ? "" : ICON_LOCK) + "</button>").join("");
+    const waxes = INKS.concat(WAXES).map(w => '<button class="inkwell" data-pv-wax="' + w.id + '" aria-pressed="' + (pv.wax === w.id) + '"><span class="drop"><img class="seal-img" src="' +
+      SealArt.render({ px: Math.round(46 * DPR), ink: w.id, emblem: null, pressed: false, seed: "drop-" + w.id }) + '" alt="">' + (ownsWax(w.id) ? "" : '<span class="lockmark">' + ICON_LOCK + "</span>") + "</span>" + w.name + "</button>").join("");
+    const perk = (icon, title, text, soon) => '<div class="perk"><span class="pi2">' + icon + "</span><div><b>" + title + (soon ? "<em>SOON</em>" : "") + "</b><span>" + text + "</span></div></div>";
+    const perks =
+      perk(esc(pv.letter || "S"), "Thine own seal", "Thine initial pressed into every sealed page, the diary's lock, and the quill seal.") +
+      perk('<svg class="i" viewBox="0 0 24 24"><path d="M12 3c3 4.5 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 3-6.5 6-11z"/></svg>', "Nine waxes", "Gold, jet, ivory, rose and forest join the four inks.") +
+      perk('<svg class="i" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 9.5 4.3 4.3 0 0 0 7 18z"/></svg>', "iCloud sync", "Thy diary on iPhone and iPad, kept in thine own iCloud, never on ours.") +
+      perk('<svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="16" height="7" rx="1.5"/></svg>', "Widgets", "Today's question and thy kept days on the Home Screen and Lock Screen.") +
+      perk(ICON_BOOK, "Bound volumes", "Export any year as an illuminated manuscript PDF, ready to print.") +
+      perk('<svg class="i" viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="1.5"/><path d="M4 7l8 6 8-6"/></svg>', "Sealed letters", "Send a page to a friend. They open it by breaking thy seal.", true);
+    const usable = ownsEmblem(pv.emblem) && ownsWax(pv.wax);
+    const cta = s.patron
+      ? '<button class="btn-rubric" id="btn-use-seal">USE THIS SEAL</button><p class="price-note">Thou art a Patron. Thank thee for keeping the scriptorium lit.</p>'
+      : '<button class="btn-rubric" id="btn-become">BECOME A PATRON · $7.99</button><p class="price-note">One payment, thine forever. No subscription. Writing, sealing and vigils stay free.</p>' +
+        (usable && pv.emblem !== "monogram" ? '<button class="buy" id="btn-use-seal" style="width:100%">USE THIS SIGNET</button>' : "");
+    const shelf = visiblePacks().map(pk => {
+      const owned = s.signets.includes(pk.id);
+      return '<div class="signet">' + (pk.seasonal ? '<span class="ribbon-tag">THIS SEASON</span>' : "") + '<div class="seals">' +
+        pk.emblems.map((e, i) => '<img class="seal-img" src="' + SealArt.render({ px: Math.round(78 * DPR), ink: pk.wax, emblem: e, seed: "pack-" + pk.id + i }) + '" alt="">').join("") +
+        "</div><b>" + pk.name + "</b><span>" + pk.note + '</span><button class="buy" data-buy="' + pk.id + '"' + (owned ? " disabled" : "") + ">" + (owned ? "THINE" : pk.price) + "</button></div>";
+    }).join("");
+    const notify = id => '<button class="notify" data-notify="' + id + '" aria-pressed="' + s.notify.includes(id) + '">' + (s.notify.includes(id) ? "We'll tell thee" : "Tell me when") + "</button>";
+    const workshop =
+      '<div class="workshop"><span class="art">' + ICON_BOOK.replace('class="i"', 'class="i"') + '</span><div style="flex:1"><b>Bind thy year</b><span>A clothbound book of thy year\'s pages, printed with illuminated initials. Sealed pages stay out.</span><span class="price">FROM $39 · COMING SOON</span>' + notify("book") + "</div></div>" +
+      '<div class="workshop"><span class="art"><img class="seal-img" src="' + SealArt.render({ px: Math.round(56 * DPR), ink: "gold", emblem: pv.letter || "S", seed: "workshop" }) + '" alt=""></span><div style="flex:1"><b>A real seal</b><span>A brass stamp engraved with thine initial, and three sticks of wax to match.</span><span class="price">$34 · COMING SOON</span>' + notify("stamp") + "</div></div>";
+    const tips = [["A taper", "$1.99"], ["A beeswax candle", "$4.99"], ["A chandelier", "$9.99"]];
+    $("#patron-body").innerHTML =
+      '<div class="patron-hero"><img class="seal-img" id="patron-seal" src="' + heroSeal() + '" alt="Preview of thy seal"><h1>Thine own seal</h1><p>Press thine initial into every sealed page.</p></div>' +
+      '<section><span class="label">Design thy seal</span><div class="card"><div class="mono-row"><label for="mono-input">Thine initial</label><input id="mono-input" class="mono-input" maxlength="2" value="' + esc(pv.letter || "") + '" autocomplete="off" autocapitalize="characters" spellcheck="false"></div><div class="chips">' + chips + '</div></div><div class="card pad"><div class="waxes">' + waxes + "</div></div></section>" +
+      '<section><span class="label">The Patronage</span><div class="card">' + perks + "</div>" + cta + "</section>" +
+      '<section><span class="label">The Signet Shop</span><div class="shelf">' + shelf + '</div><p class="note">Small, separate purchases. Signets work with or without the Patronage.</p></section>' +
+      '<section><span class="label">From the Workshop</span><div class="card">' + workshop + "</div></section>" +
+      '<section><span class="label">Light a candle for the scribe</span><div class="card"><div class="candles">' + tips.map((t, i) => '<button data-tip="' + i + '">' + ICON_CANDLE + "<b>" + t[1] + "</b>" + t[0] + "</button>").join("") + "</div></div>" +
+      (s.tips ? '<p class="note">Thou hast lit ' + numWord(Math.min(s.tips, 99)) + (s.tips === 1 ? " candle" : " candles") + " for the scribe. Thank thee.</p>" : "") + "</section>" +
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><button class="text-btn" id="btn-restore">Restore purchases</button><p class="note" style="text-align:center">Prototype: purchases are simulated and no money is taken.</p></div>';
+  }
+  function applyPreview() {
+    const s = state.settings, pv = ui.preview;
+    if (ownsEmblem(pv.emblem)) { s.emblem = pv.emblem; s.monogram = pv.letter || "S"; }
+    if (ownsWax(pv.wax)) {
+      if (isInk(pv.wax)) { s.ink = pv.wax; s.wax = null; } else s.wax = pv.wax;
+    }
+  }
+  function stampOverlay(src) {
+    const layer = document.createElement("div");
+    layer.className = "stamp";
+    layer.innerHTML = '<img class="seal-img" src="' + src + '" alt="">';
+    app.appendChild(layer);
+    setTimeout(() => buzz(24), 260);
+    setTimeout(() => layer.remove(), 1500);
+  }
+  function refreshEverywhere() {
+    persist(); applySettings(); renderPatron(); renderHome(); renderChamber();
+  }
+  $("#patron-body").addEventListener("input", e => {
+    if (e.target.id !== "mono-input") return;
+    const letters = e.target.value.match(/\p{L}/gu) || [];
+    const ch = letters.length ? letters[letters.length - 1].toUpperCase() : "";
+    e.target.value = ch;
+    ui.preview.letter = ch || "S";
+    ui.preview.emblem = "monogram";
+    $("#patron-seal").src = heroSeal();
+    document.querySelectorAll("#patron-body [data-emblem]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.emblem === "monogram")));
+    const first = document.querySelector("#patron-body .perk .pi2");
+    if (first) first.textContent = ui.preview.letter;
+  });
+  $("#patron-body").addEventListener("click", e => {
+    const t = e.target.closest("button");
+    if (!t) return;
+    const s = state.settings;
+    if (t.dataset.emblem) { ui.preview.emblem = t.dataset.emblem; renderPatron(); }
+    else if (t.dataset.pvWax) { ui.preview.wax = t.dataset.pvWax; renderPatron(); }
+    else if (t.id === "btn-become") {
+      faceID(() => {
+        s.patron = true;
+        applyPreview();
+        refreshEverywhere();
+        stampOverlay(heroSeal());
+        toast("Welcome, Patron", { seal: "welcome-patron" });
+      });
+    } else if (t.id === "btn-use-seal") {
+      if (!ownsEmblem(ui.preview.emblem) || !ownsWax(ui.preview.wax)) { toast(s.patron ? "Buy that signet first" : "Become a Patron to use this seal", { icon: ICON_LOCK }); return; }
+      applyPreview();
+      refreshEverywhere();
+      toast("Thy seal is set", { seal: "seal-set" });
+    } else if (t.dataset.buy) {
+      const pk = PACKS.find(x => x.id === t.dataset.buy);
+      faceID(() => {
+        s.signets.push(pk.id);
+        ui.preview.emblem = pk.emblems[0];
+        if (pk.unlocksWax || s.patron) ui.preview.wax = pk.wax;
+        persist(); renderPatron();
+        toast(pk.name + " is thine", { icon: ICON_CHECK });
+      });
+    } else if (t.dataset.notify) {
+      const id = t.dataset.notify, on = !s.notify.includes(id);
+      s.notify = on ? s.notify.concat(id) : s.notify.filter(x => x !== id);
+      persist(); renderPatron();
+      if (on) toast("We'll tell thee when it is ready", { icon: ICON_BELL });
+    } else if (t.dataset.tip !== undefined) {
+      faceID(() => { s.tips += 1; persist(); renderPatron(); toast("A candle is lit. Thank thee.", { icon: ICON_CANDLE }); });
+    } else if (t.id === "btn-restore") {
+      toast("Purchases restored", { icon: ICON_CHECK });
+    }
+  });
+
+  // ---------- The diary lock ----------
+  function showLock() {
+    if (!state.settings.lock || !state.seenWelcome) return;
+    const l = $("#lockscreen");
+    if (!l.hidden && !l.classList.contains("gone")) return;
+    $("#lock-seal").innerHTML = '<img class="seal-img" src="' + seal(190, { seed: "diary-lock" }) + '" alt="">';
+    l.hidden = false;
+    l.classList.remove("gone");
+  }
+  $("#btn-unlock").addEventListener("click", () => {
+    faceID(() => crack($("#lock-seal img"), () => {
+      const l = $("#lockscreen");
+      l.classList.add("gone");
+      setTimeout(() => { l.hidden = true; }, 420);
+    }));
+  });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") showLock(); });
+
   // ---------- Welcome ----------
   function showWelcome() {
     const w = $("#welcome");
@@ -1705,12 +2161,14 @@ button.srow:first-child { border-top: 0; }
   applySettings();
   renderHome();
   if (!state.seenWelcome) $("#welcome").hidden = false;
+  else showLock();
   // Re-draw seals once the blackletter face has loaded, so the stamped "S" uses it.
   if (document.fonts && document.fonts.load) {
     document.fonts.load('64px "UnifrakturMaguntia"').then(() => {
       SealArt.clear();
       paintSeals();
       renderHome();
+      if (ui.view === "patron") renderPatron();
       if (ui.view === "sealed" && ui.current) $("#sealed-seal").innerHTML = '<img class="seal-img" src="' + seal(168, { seed: ui.current.id }) + '" alt="">';
     }).catch(() => {});
   }

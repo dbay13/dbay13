@@ -6,53 +6,73 @@ Everything needed to list Scriptorium, plus the steps to ship it.
 
 | Field | Text | Limit |
 | --- | --- | --- |
-| App name | Scriptorium: Quiet Notes | 30 |
-| Subtitle | A quiet medieval notebook | 30 |
-| Category | Productivity (secondary: Lifestyle) | |
+| App name | Scriptorium: Sealed Diary | 30 |
+| Subtitle | A private medieval journal | 30 |
+| Category | Lifestyle (secondary: Productivity) | |
 | Age rating | 4+ | |
-| Price | Your choice. Free with a one-time "Patron" unlock would suit it later. | |
+| Price | Free, with in-app purchases (see `docs/MONETIZATION.md`) | |
 
-App names must be unique on the store. If "Scriptorium: Quiet Notes" is taken, try "Scriptorium Notes" or "Scriptorium – Writing Desk".
+App names must be unique on the store. If "Scriptorium: Sealed Diary" is taken, try "Scriptorium Diary" or "Scriptorium – Sealed Journal".
 
 **Promotional text** (170 characters, can change without review):
 
-> Write as the scribes did. One quiet page, illuminated initials, wax-sealed secrets and a candle that burns while you focus.
+> A private diary sealed in wax. A page for every day, a question when it is blank, and a seal with thine own initial.
 
 **Keywords** (100 characters, comma-separated, no spaces):
 
 ```
-notes,notepad,journal,medieval,fantasy,minimalist,writing,diary,private,lock,focus,checklist,quill
+journal,diary,private,lock,mood,tracker,prompts,gratitude,medieval,fantasy,writing,wax,seal,quill
 ```
 
 **Description:**
 
-> Scriptorium is a quiet chamber for your thoughts: a minimalist notebook dressed as a medieval manuscript.
+> Scriptorium is a private diary dressed as a medieval manuscript, and every secret in it is sealed in wax.
 >
-> ONE PAGE, NO CLUTTER
-> Open it and write. The first line becomes the title, and every word is kept as you type. No folders to tend, no formatting to fight.
+> A PAGE FOR EVERY DAY
+> Open it and today's page is waiting. When it is blank, a gentle question waits with it. A gilt calendar shows the days you have kept.
 >
-> ILLUMINATED
-> Each scroll opens with a blackletter initial set in a gilt frame, with your words flowing around it, as in a monastery manuscript.
+> SEALED IN WAX
+> Press a wax seal onto any page. Only Face ID, Touch ID or your passcode can break it, and it cracks in two when you do. Seal the whole diary too, so it asks for your face each time it opens.
 >
-> SEAL WHAT IS PRIVATE
-> Press a wax seal onto any scroll. Only Face ID, Touch ID or your passcode can break it. Sealed scrolls hide their contents everywhere in the app.
+> KEEP THY HUMOURS
+> Mark each day sanguine, choleric, melancholic or phlegmatic: mood tracking the medieval way. See which humour ruled your month.
 >
 > WRITE BY CANDLELIGHT
-> Begin a Vigil and the page goes dark. A single candle burns down as you write, and only the paragraph you are working on stays in full ink.
+> Begin a vigil and the page goes dark. A single candle burns down as you write, and only the paragraph you are working on stays in full ink.
 >
 > AND A FEW SMALL JOYS
+> • Illuminated initials, gilt and blackletter, at the head of every page
 > • Checklists you tick with a tap
-> • Tomes to gather scrolls of a kind
-> • The Ashes: burned scrolls wait thirty days before they are gone
-> • Share any scroll as an illuminated manuscript page
-> • Vellum, Candlelight, or let the sun decide
-> • Four rubric inks: Vermilion, Lapis, Verdigris and Tyrian
 > • Time told in the old hours: Matins, Vespers, Compline
-> • Optional quill scratch sounds and haptics
-> • Export everything as Markdown
+> • An evening bell to remind you to write
+> • The Ashes: burned pages wait thirty days before they are gone
+> • Share a page as an illuminated manuscript image, or export everything
+> • Vellum, Candlelight, or let the sun decide
+>
+> BECOME A PATRON
+> One payment, yours forever: a seal stamped with your own initial, nine waxes, iCloud sync and widgets. Writing, sealing and the diary lock are always free.
 >
 > PRIVATE BY DESIGN
-> No account. No tracking. No analytics. Your scrolls never leave your iPhone.
+> No account. No tracking. No analytics. Your pages never leave your devices.
+
+## In-app purchases
+
+Create these in App Store Connect (all StoreKit 2):
+
+| Product ID | Type | Price | Name |
+| --- | --- | --- | --- |
+| `patron` | Non-consumable | $7.99 | The Patronage |
+| `signet.royal` | Non-consumable | $1.99 | The Royal House |
+| `signet.garden` | Non-consumable | $0.99 | The Walled Garden |
+| `signet.wayfarer` | Non-consumable | $1.99 | The Wayfarer |
+| `signet.hallows` | Non-consumable | $0.99 | All Hallows' Wax (sold Oct 1 – Nov 2) |
+| `candle.taper` | Consumable | $1.99 | A taper |
+| `candle.beeswax` | Consumable | $4.99 | A beeswax candle |
+| `candle.chandelier` | Consumable | $9.99 | A chandelier |
+
+Every purchase screen needs a **Restore purchases** button. Physical goods (the printed book and the brass
+seal) are sold outside in-app purchase, through a web checkout, which Apple allows for physical items.
+Join the **App Store Small Business Program** so Apple's commission is 15% instead of 30%.
 
 ## App Privacy ("nutrition label")
 
@@ -65,14 +85,15 @@ The privacy manifest (`Scriptorium/PrivacyInfo.xcprivacy`) declares no tracking 
 Required: the 6.9" iPhone set, **1320 × 2868** portrait (or 1290 × 2796). Apple scales these down for smaller iPhones.
 Up to 10 screenshots; 4 to 6 is the sweet spot.
 
-The design canvas has four marketing frames to recreate at full size:
+Five marketing frames to make at full size, using the prototype as the guide:
 
-1. "Write as the scribes did." (editor with illuminated initial)
-2. "Write by candlelight." (Vigil mode)
-3. "Seal thy secrets." (sealed scroll)
-4. "Every scroll, one codex." (home list)
+1. "A page for every day." (the Chronicle: today's question and the gilt calendar)
+2. "Thine own seal." (the Patronage: an initial pressed into gold wax)
+3. "Seal thy secrets." (a sealed page cracking open)
+4. "Keep thy humours." (an entry marked sanguine, and the month's tally)
+5. "Write by candlelight." (Vigil mode)
 
-To capture the raw screens: run on the **iPhone 16 Pro Max** simulator, add a few good-looking scrolls, then
+To capture the raw screens: run on the **iPhone 16 Pro Max** simulator, add a few good-looking pages, then
 press ⌘S in the Simulator. Place those captures in the marketing frames.
 
 ## Submission checklist
